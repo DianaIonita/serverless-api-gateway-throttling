@@ -14,7 +14,7 @@ plugins:
 custom:
   # Configures throttling settings for all http endpoints
   apiGatewayThrottling:
-    enabled: true # defaults to "true". Enables or disables throttling globally.
+    enabled: true # enables or disables throttling globally.
     maxRequestsPerSecond: 1000
     maxConcurrentRequests: 500
 
@@ -47,10 +47,8 @@ functions:
           method: get
           throttling:
             enabled: false # defaults to "true". Enables or disables throttling for this event.
-            maxRequestsPerSecond: 3000
-            maxConcurrentRequests: 1500
       - http:
-          path: /cat/collar/{collarId}
+          path: /cat/{catId}
           method: get
           throttling:
             maxRequestsPerSecond: 2000
