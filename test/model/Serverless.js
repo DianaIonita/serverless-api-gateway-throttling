@@ -4,7 +4,11 @@ class Serverless {
   constructor() {
     this.service = {
       custom: {},
-      provider: {}
+      provider: {
+        compiledCloudFormationTemplate: {
+          Resources: []
+        }
+      }
     }
   }
 
@@ -34,6 +38,16 @@ class Serverless {
     let functionName = Object.keys(serverlessFunction)[0];
     this.service.functions[functionName] = serverlessFunction[functionName];
 
+    // when a function with an http endpoint is defined, serverless creates an ApiGatewayRestApi resource
+    this.service.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'] = {};
+    return this;
+  }
+
+  withPredefinedRestApiId(restApiId) {
+    if (!this.service.provider.apiGateway) {
+      this.service.provider.apiGateway = {}
+    }
+    this.service.provider.apiGateway.restApiId = restApiId;
     return this;
   }
 }
