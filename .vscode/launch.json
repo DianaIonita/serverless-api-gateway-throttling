@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+      "args": [
+        "test/**/*.js",
+        "-t",
+        "10000",
+        "--color"
+      ]
+    },
+  ]
+}
