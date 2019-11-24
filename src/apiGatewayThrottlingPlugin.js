@@ -29,12 +29,6 @@ class ApiGatewayThrottlingPlugin {
       this.createSettings();
     }
 
-    if (!this.settings) {
-      // TODO log useful messages about throttling config
-      return;
-    }
-    // TODO log useful messages about throttling config
-
     this.thereIsARestApi = restApiExists(this.serverless);
     if (!this.thereIsARestApi) {
       this.serverless.cli.log('[serverless-api-gateway-throttling] No Rest API found. Throttling settings will be ignored.');

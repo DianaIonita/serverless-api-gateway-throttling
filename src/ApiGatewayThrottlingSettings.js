@@ -1,6 +1,7 @@
 'use strict';
 
 const get = require('lodash.get');
+const isEmpty = require('lodash.isempty');
 
 const DEFAULT_MAX_REQUESTS_PER_SECOND = 10000;
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 5000;
@@ -9,11 +10,13 @@ const isApiGatewayEndpoint = event => {
   return event.http ? true : false;
 }
 
+const hasCustomThrottlingConfig = event => {
+  return event.http.throttling != undefined;
+}
+
 class ApiGatewayEndpointThrottlingSettings {
   constructor(customFunctionName, functionName, event, globalSettings) {
-    // TODO needed?
-    this.customFunctionName = customFunctionName;
-    this.functionName = functionName;
+    this.functionName = customFunctionName || functionName;
 
     if (typeof (event.http) === 'string') {
       let parts = event.http.split(' ');
@@ -50,9 +53,15 @@ class ApiGatewayThrottlingSettings {
 
     for (let functionName in serverless.service.functions) {
       let functionSettings = serverless.service.functions[functionName];
-      for (let event in functionSettings.events) {
-        if (isApiGatewayEndpoint(functionSettings.events[event])) {
-          this.endpointSettings.push(new ApiGatewayEndpointThrottlingSettings(functionSettings.name, functionName, functionSettings.events[event], this))
+      if (isEmpty(functionSettings.events)) {
+        continue;
+      }
+      for (let event of functionSettings.events) {
+        if (isApiGatewayEndpoint(event)) {
+          if (!hasCustomThrottlingConfig(event)) {
+            continue;
+          }
+          this.endpointSettings.push(new ApiGatewayEndpointThrottlingSettings(functionSettings.name, functionName, event, this))
         }
       }
     }

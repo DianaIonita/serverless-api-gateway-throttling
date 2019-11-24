@@ -4,7 +4,7 @@ const given = require('./steps/given');
 const ApiGatewayThrottlingSettings = require('../src/ApiGatewayThrottlingSettings');
 const expect = require('chai').expect;
 
-describe.only('Creating settings', () => {
+describe('Creating throttling settings', () => {
   let throttlingSettings, serverless;
 
   describe('when there are no settings for API Gateway throttling', () => {
@@ -109,27 +109,12 @@ describe.only('Creating settings', () => {
           throttlingSettings = createSettingsFor(serverless);
         });
 
-        it('should create throttling settings for all http endpoints', () => {
-          expect(throttlingSettings.endpointSettings).to.have.lengthOf(2);
+        it('should create throttling settings only for the http endpoints with custom throttling configuration', () => {
+          expect(throttlingSettings.endpointSettings).to.have.lengthOf(1);
         });
 
         it('should not create throttling settings for the function without an http endpoint', () => {
           expect(throttlingSettings.endpointSettings.find(e => e.functionName == 'count-items-cron-job')).to.not.exist;
-        });
-
-        describe('for the http endpoint without custom throttling settings', () => {
-          let endpointSettings;
-          before(() => {
-            endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
-          });
-
-          it('should inherit maxRequestsPerSecond from global settings', () => {
-            expect(endpointSettings.maxRequestsPerSecond).to.equal(globalThrottlingConfig.maxRequestsPerSecond);
-          });
-
-          it('should inherit maxConcurrentRequests from global settings', () => {
-            expect(endpointSettings.maxConcurrentRequests).to.equal(globalThrottlingConfig.maxConcurrentRequests);
-          });
         });
 
         describe('for the http endpoint with custom maxRequestsPerSecond and maxConcurrentRequests settings', () => {
@@ -234,8 +219,8 @@ describe.only('Creating settings', () => {
       throttlingSettings = createSettingsFor(serverless);
     });
 
-    it('should create throttling settings for the http endpoint', () => {
-      expect(throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items')).to.exist;
+    it('should not create throttling settings for the http endpoint', () => {
+      expect(throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items')).to.not.exist;
     });
   });
 });

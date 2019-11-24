@@ -9,13 +9,16 @@ class Serverless {
         this._logMessages.push(logMessage);
       }
     };
-    
+
     this.service = {
       custom: {},
       provider: {
         compiledCloudFormationTemplate: {
           Resources: []
         }
+      },
+      getFunction(functionName) {
+        return this.functions[functionName];
       }
     }
   }
