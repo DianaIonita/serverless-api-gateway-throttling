@@ -30,9 +30,8 @@ class Serverless {
     return this;
   }
 
-  withApiGatewayThrottlingConfig({ throttlingEnabled, maxRequestsPerSecond, maxConcurrentRequests } = {}) {
+  withApiGatewayThrottlingConfig({ maxRequestsPerSecond, maxConcurrentRequests } = {}) {
     this.service.custom.apiGatewayThrottling = {
-      enabled: throttlingEnabled,
       maxRequestsPerSecond,
       maxConcurrentRequests
     };

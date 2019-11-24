@@ -4,40 +4,31 @@ const given = require('./steps/given');
 const ApiGatewayThrottlingSettings = require('../src/ApiGatewayThrottlingSettings');
 const expect = require('chai').expect;
 
-describe('Creating settings', () => {
+describe.only('Creating settings', () => {
   let throttlingSettings, serverless;
 
-  describe('when the input is invalid', () => {
-    it('should not configure throttling', () => {
-      throttlingSettings = createSettingsFor();
-      expect(throttlingSettings.throttlingEnabled).to.not.exist;
-    });
-  });
-
   describe('when there are no settings for API Gateway throttling', () => {
-    it('should not configure throttling', () => {
-      throttlingSettings = createSettingsFor(given.a_serverless_instance());
-      expect(throttlingSettings.throttlingEnabled).to.not.exist;
+    before(() => {
+      serverless = given.a_serverless_instance();
+      throttlingSettings = createSettingsFor(serverless);
     });
-  });
 
-  describe('when API Gateway throttling is disabled', () => {
-    it('should set throttling to disabled', () => {
-      throttlingSettings = createSettingsFor(given.a_serverless_instance().withApiGatewayThrottlingConfig({ throttlingEnabled: false }));
-      expect(throttlingSettings.throttlingEnabled).to.be.false;
+    it('should not return anything', () => {
+      expect(throttlingSettings).to.be.empty;
+    });
+
+    it('should log a warning message that no throttling settings will be applied', () => {
+      expect(serverless._logMessages).to.have.lengthOf(1);
+      expect(serverless._logMessages[0]).to.equal('[serverless-api-gateway-throttling] Warning: throttling settings not found, the plugin won\'t perform any actions.');
     });
   });
 
   describe('when the max requests per second setting is omitted', () => {
     before(() => {
       serverless = given.a_serverless_instance()
-        .withApiGatewayThrottlingConfig({ enabled: true, maxConcurrentRequests: 2000 });
+        .withApiGatewayThrottlingConfig({ maxConcurrentRequests: 2000 });
 
       throttlingSettings = createSettingsFor(serverless);
-    });
-
-    it('should set whether throttling is enabled', () => {
-      expect(throttlingSettings.throttlingEnabled).to.be.true;
     });
 
     it('should set max concurrent requests', () => {
@@ -52,13 +43,9 @@ describe('Creating settings', () => {
   describe('when the max concurrent requests setting is omitted', () => {
     before(() => {
       serverless = given.a_serverless_instance()
-        .withApiGatewayThrottlingConfig({ enabled: true, maxRequestsPerSecond: 300 });
+        .withApiGatewayThrottlingConfig({ maxRequestsPerSecond: 300 });
 
       throttlingSettings = createSettingsFor(serverless);
-    });
-
-    it('should set whether throttling is enabled', () => {
-      expect(throttlingSettings.throttlingEnabled).to.be.true;
     });
 
     it('should set max requests per second', () => {
@@ -73,13 +60,9 @@ describe('Creating settings', () => {
   describe('when all settings have been defined', () => {
     before(() => {
       serverless = given.a_serverless_instance()
-        .withApiGatewayThrottlingConfig({ enabled: true, maxRequestsPerSecond: 400, maxConcurrentRequests: 200 });
+        .withApiGatewayThrottlingConfig({ maxRequestsPerSecond: 400, maxConcurrentRequests: 200 });
 
       throttlingSettings = createSettingsFor(serverless);
-    });
-
-    it('should set whether throttling is enabled', () => {
-      expect(throttlingSettings.throttlingEnabled).to.be.true;
     });
 
     it('should set max requests per second', () => {
@@ -93,7 +76,6 @@ describe('Creating settings', () => {
 
   describe('when there are settings defined for API Gateway throttling', () => {
     const globalThrottlingConfig = {
-      enabled: true,
       maxRequestsPerSecond: 2000,
       maxConcurrentRequests: 1000
     };
@@ -122,46 +104,23 @@ describe('Creating settings', () => {
             .withFunction(given.a_serverless_function('list-items')
               .withHttpEndpoint('get', '/items'))
             .withFunction(given.a_serverless_function('get-item')
-              .withHttpEndpoint('get', '/item/{itemId}', { enabled: false }))
-            .withFunction(given.a_serverless_function('update-item')
-              .withHttpEndpoint('post', '/item/{itemId}', { enabled: true }))
-            .withFunction(given.a_serverless_function('delete-item')
-              .withHttpEndpoint('delete', '/item/{itemId}', { enabled: true, maxRequestsPerSecond: 500, maxConcurrentRequests: 200 }));
+              .withHttpEndpoint('get', '/item/{itemId}', { maxRequestsPerSecond: 500, maxConcurrentRequests: 200 }));
 
           throttlingSettings = createSettingsFor(serverless);
         });
 
-        it('should create throttling settings for the http endpoints with custom throttling configuration', () => {
-          expect(throttlingSettings.endpointSettings).to.have.lengthOf(3);
+        it('should create throttling settings for all http endpoints', () => {
+          expect(throttlingSettings.endpointSettings).to.have.lengthOf(2);
         });
 
         it('should not create throttling settings for the function without an http endpoint', () => {
           expect(throttlingSettings.endpointSettings.find(e => e.functionName == 'count-items-cron-job')).to.not.exist;
         });
 
-        it('should not create throttling settings for the http endpoint without custom throttling configuration', () => {
-          expect(throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items')).to.not.exist;
-        });
-
-        describe('for the http endpoint with throttling disabled', () => {
+        describe('for the http endpoint without custom throttling settings', () => {
           let endpointSettings;
           before(() => {
-            endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'get-item');
-          });
-
-          it('throttling should be set to false', () => {
-            expect(endpointSettings.throttlingEnabled).to.be.false;
-          });
-        });
-
-        describe('for the http endpoint with throttling enabled', () => {
-          let endpointSettings;
-          before(() => {
-            endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'update-item');
-          });
-
-          it('throttling should be set to true', () => {
-            expect(endpointSettings.throttlingEnabled).to.be.true;
+            endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
           });
 
           it('should inherit maxRequestsPerSecond from global settings', () => {
@@ -173,14 +132,10 @@ describe('Creating settings', () => {
           });
         });
 
-        describe('for the http endpoint with throttling enabled and custom maxRequestsPerSecond and maxConcurrentRequests settings', () => {
+        describe('for the http endpoint with custom maxRequestsPerSecond and maxConcurrentRequests settings', () => {
           let endpointSettings;
           before(() => {
-            endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'delete-item');
-          });
-
-          it('throttling should be set to true', () => {
-            expect(endpointSettings.throttlingEnabled).to.be.true;
+            endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'get-item');
           });
 
           it('maxRequestsPerSecond should be set', () => {
@@ -198,8 +153,8 @@ describe('Creating settings', () => {
           serverless = given.a_serverless_instance()
             .withApiGatewayThrottlingConfig(globalThrottlingConfig)
             .withFunction(given.a_serverless_function('list-items')
-              .withHttpEndpoint('get', '/items', { enabled: true, maxRequestsPerSecond: 500, maxConcurrentRequests: 200 })
-              .withHttpEndpoint('get', '/all-items', { enabled: true, maxRequestsPerSecond: 100, maxConcurrentRequests: 50 }));
+              .withHttpEndpoint('get', '/items', { maxRequestsPerSecond: 500, maxConcurrentRequests: 200 })
+              .withHttpEndpoint('get', '/all-items', { maxRequestsPerSecond: 100, maxConcurrentRequests: 50 }));
 
           throttlingSettings = createSettingsFor(serverless);
         });
@@ -216,7 +171,7 @@ describe('Creating settings', () => {
     before(() => {
       serverless = given.a_serverless_instance()
         .forStage('devstage').forRegion('eu-west-1')
-        .withApiGatewayThrottlingConfig({ enabled: true });
+        .withApiGatewayThrottlingConfig();
     });
 
     describe('and they do not specify the stage', () => {
@@ -269,20 +224,18 @@ describe('Creating settings', () => {
   });
 
   describe('when a http endpoint is defined in shorthand', () => {
-    describe('and throttling is turned on', () => {
-      before(() => {
-        let endpoint = given.a_serverless_function('list-items')
-          .withHttpEndpointInShorthand('get /items');
-        serverless = given.a_serverless_instance()
-          .withApiGatewayThrottlingConfig({ enabled: true })
-          .withFunction(endpoint);
+    before(() => {
+      let endpoint = given.a_serverless_function('list-items')
+        .withHttpEndpointInShorthand('get /items');
+      serverless = given.a_serverless_instance()
+        .withApiGatewayThrottlingConfig()
+        .withFunction(endpoint);
 
-        throttlingSettings = createSettingsFor(serverless);
-      });
+      throttlingSettings = createSettingsFor(serverless);
+    });
 
-      it('should not create throttling settings for the http endpoint', () => {
-        expect(throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items')).to.not.exist;
-      });
+    it('should create throttling settings for the http endpoint', () => {
+      expect(throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items')).to.exist;
     });
   });
 });

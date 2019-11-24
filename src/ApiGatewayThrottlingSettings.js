@@ -9,10 +9,6 @@ const isApiGatewayEndpoint = event => {
   return event.http ? true : false;
 }
 
-const hasCustomThrottlingSettings = event => {
-  return event.http.throttling != undefined;
-}
-
 class ApiGatewayEndpointThrottlingSettings {
   constructor(customFunctionName, functionName, event, globalSettings) {
     // TODO needed?
@@ -29,17 +25,15 @@ class ApiGatewayEndpointThrottlingSettings {
       this.method = event.http.method;
     }
 
-    let throttlingConfig = event.http.throttling;
-
-    this.maxRequestsPerSecond = throttlingConfig.maxRequestsPerSecond || globalSettings.maxRequestsPerSecond;
-    this.maxConcurrentRequests = throttlingConfig.maxConcurrentRequests || globalSettings.maxConcurrentRequests;
+    this.maxRequestsPerSecond = get(event.http.throttling, 'maxRequestsPerSecond', globalSettings.maxRequestsPerSecond);
+    this.maxConcurrentRequests = get(event.http.throttling, 'maxConcurrentRequests', globalSettings.maxConcurrentRequests);
   }
 }
 
 class ApiGatewayThrottlingSettings {
   constructor(serverless, options) {
     if (!get(serverless, 'service.custom.apiGatewayThrottling')) {
-      // TODO warning that settings not defined
+      serverless.cli.log('[serverless-api-gateway-throttling] Warning: throttling settings not found, the plugin won\'t perform any actions.');
       return;
     }
     if (options) {
@@ -58,9 +52,6 @@ class ApiGatewayThrottlingSettings {
       let functionSettings = serverless.service.functions[functionName];
       for (let event in functionSettings.events) {
         if (isApiGatewayEndpoint(functionSettings.events[event])) {
-          if (!hasCustomThrottlingSettings(functionSettings.events[event])) {
-            continue;
-          }
           this.endpointSettings.push(new ApiGatewayEndpointThrottlingSettings(functionSettings.name, functionName, functionSettings.events[event], this))
         }
       }
