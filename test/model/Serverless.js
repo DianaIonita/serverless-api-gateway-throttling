@@ -2,6 +2,14 @@
 
 class Serverless {
   constructor() {
+    this._recordedAwsRequests = [];
+    this._logMessages = [];
+    this.cli = {
+      log: (logMessage) => {
+        this._logMessages.push(logMessage);
+      }
+    };
+    
     this.service = {
       custom: {},
       provider: {
@@ -49,6 +57,43 @@ class Serverless {
     }
     this.service.provider.apiGateway.restApiId = restApiId;
     return this;
+  }
+
+  setDeployedRestApiId(restApiId, settings) {
+    const stackName = 'serverless-stack-name';
+    this.providers = {
+      aws: {
+        naming: {
+          getStackName: (stage) => {
+            if (stage != settings.stage) {
+              throw new Error('[Serverless Test Model] Something went wrong getting the Stack Name');
+            }
+            return stackName;
+          }
+        },
+        request: async (awsService, method, properties, stage, region) => {
+          this._recordedAwsRequests.push({ awsService, method, properties, stage, region });
+          if (awsService == 'CloudFormation'
+            && method == 'describeStacks'
+            && properties.StackName == stackName
+            && stage == settings.stage
+            && region == settings.region) {
+            return {
+              Stacks: [{
+                Outputs: [{
+                  OutputKey: 'RestApiIdForApigThrottling',
+                  OutputValue: restApiId
+                }]
+              }]
+            };
+          }
+        }
+      }
+    }
+  }
+
+  getRequestsToAws() {
+    return this._recordedAwsRequests;
   }
 }
 

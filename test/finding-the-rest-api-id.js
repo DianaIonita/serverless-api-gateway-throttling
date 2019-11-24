@@ -21,8 +21,8 @@ describe('Finding the Rest API', () => {
   describe('when the Rest API has not been defined in serverless configuration', () => {
     describe('and there are HTTP endpoints', () => {
       before(() => {
-        const functionWithHttpEndpoint = given.a_serverless_function('get-cat-by-paw-id')
-          .withHttpEndpoint('get', '/cat/{pawId}');
+        const functionWithHttpEndpoint = given.a_serverless_function('get-item-id')
+          .withHttpEndpoint('get', '/item/{itemId}');
         const serverless = given.a_serverless_instance()
           .withFunction(functionWithHttpEndpoint);
 
