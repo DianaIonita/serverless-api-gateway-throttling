@@ -41,7 +41,7 @@ describe('Updating stage throttling settings', () => {
     });
 
     it('should send a single request to AWS SDK to update stage', () => {
-      request = requestsToAws.filter(r => r.awsService == API_GATEWAY && r.method == UPDATE_STAGE);
+      const request = requestsToAws.filter(r => r.awsService == API_GATEWAY && r.method == UPDATE_STAGE);
       expect(request).to.have.lengthOf(1);
     });
 
