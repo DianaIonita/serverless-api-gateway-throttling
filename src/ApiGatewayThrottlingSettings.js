@@ -15,8 +15,8 @@ const hasCustomThrottlingConfig = event => {
 }
 
 class ApiGatewayEndpointThrottlingSettings {
-  constructor(customFunctionName, functionName, event, globalSettings) {
-    this.functionName = customFunctionName || functionName;
+  constructor(functionName, event, globalSettings) {
+    this.functionName = functionName;
 
     if (typeof (event.http) === 'string') {
       let parts = event.http.split(' ');
@@ -61,7 +61,7 @@ class ApiGatewayThrottlingSettings {
           if (!hasCustomThrottlingConfig(event)) {
             continue;
           }
-          this.endpointSettings.push(new ApiGatewayEndpointThrottlingSettings(functionSettings.name, functionName, event, this))
+          this.endpointSettings.push(new ApiGatewayEndpointThrottlingSettings(functionName, event, this))
         }
       }
     }
