@@ -14,6 +14,8 @@ class ApiGatewayThrottlingPlugin {
       'before:package:finalize': this.outputRestApiId.bind(this),
       'after:aws:deploy:finalize:cleanup': this.updateStage.bind(this),
     };
+
+    this.defineValidationSchema(serverless);
   }
 
   createSettings() {
@@ -36,6 +38,40 @@ class ApiGatewayThrottlingPlugin {
     }
 
     return updateStageThrottling(this.settings, this.serverless);
+  }
+
+  defineValidationSchema() {
+    if (!this.serverless.configSchemaHandler
+      || !this.serverless.configSchemaHandler.defineCustomProperties
+      || !this.serverless.configSchemaHandler.defineFunctionEventProperties) {
+      return;
+    }
+
+    const customThrottlingSchema = {
+      type: 'object',
+      properties: {
+        apiGatewayThrottling: {
+          properties: {
+            maxRequestsPerSecond: { type: 'number' },
+            maxConcurrentRequests: { type: 'number' }
+          }
+        }
+      }
+    }
+    this.serverless.configSchemaHandler.defineCustomProperties(customThrottlingSchema);
+
+    const httpEventThrottlingSchema = {
+      type: 'object',
+      properties: {
+        throttling: {
+          properties: {
+            maxRequestsPerSecond: { type: 'number' },
+            maxConcurrentRequests: { type: 'number' }
+          }
+        }
+      }
+    }
+    this.serverless.configSchemaHandler.defineFunctionEventProperties('aws', 'http', httpEventThrottlingSchema);
   }
 }
 
