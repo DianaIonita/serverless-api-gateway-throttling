@@ -70,12 +70,12 @@ const patchForMethod = (path, method, endpointSettings) => {
   let patch = [{
     op: 'replace',
     path: `/${patchPath}/throttling/rateLimit`,
-    value: `${endpointSettings.maxRequestsPerSecond}`
+    value: `${endpointSettings.maxRequestsPerSecond}`.isEmpty ? -1: `${endpointSettings.maxRequestsPerSecond}`
   },
   {
     op: 'replace',
     path: `/${patchPath}/throttling/burstLimit`,
-    value: `${endpointSettings.maxConcurrentRequests}`
+    value: `${endpointSettings.maxConcurrentRequests}`.isEmpty ? -1: `${endpointSettings.maxConcurrentRequests}`
   }]
   return patch;
 }
