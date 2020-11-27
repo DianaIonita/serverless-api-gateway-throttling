@@ -28,7 +28,7 @@ class ApiGatewayEndpointThrottlingSettings {
       this.method = event.http.method;
     }
 
-    if (!event.http.throttling) {
+    if (event.http.throttling.isEmpty) {
       this.maxRequestsPerSecond = -1
       this.maxConcurrentRequests = -1
     }
@@ -36,7 +36,8 @@ class ApiGatewayEndpointThrottlingSettings {
       this.maxRequestsPerSecond = get(event.http.throttling, 'maxRequestsPerSecond', globalSettings.maxRequestsPerSecond);
       this.maxConcurrentRequests = get(event.http.throttling, 'maxConcurrentRequests', globalSettings.maxConcurrentRequests);
     }
-
+  }
+}
 class ApiGatewayThrottlingSettings {
   constructor(serverless, options) {
     if (!get(serverless, 'service.custom.apiGatewayThrottling')) {
