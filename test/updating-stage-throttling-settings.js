@@ -89,8 +89,8 @@ describe('Updating stage throttling settings', () => {
           .withHttpEndpoint('get', '/items', { maxRequestsPerSecond: 200, maxConcurrentRequests: 100 }))
         .withFunction(given.a_serverless_function('create-item')
           .withHttpEndpoint('post', '/item/{itemId}', { maxRequestsPerSecond: 100, maxConcurrentRequests: 50 }))
-        .withFunction(given.a_serverless_function('reset-item')
-          .withHttpEndpoint('post', '/item/{itemId}', { maxRequestsPerSecond: -1, maxConcurrentRequests: -1 }));
+        .withFunction(given.a_serverless_function('delete-item')
+          .withHttpEndpoint('delete', '/item/{itemId}'));
 
       settings = new ApiGatewayThrottlingSettings(serverless);
 
