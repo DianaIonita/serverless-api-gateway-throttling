@@ -58,9 +58,6 @@ class ApiGatewayThrottlingSettings {
       }
       for (let event of functionSettings.events) {
         if (isApiGatewayEndpoint(event)) {
-          if (!hasCustomThrottlingConfig(event)) {
-            continue;
-          }
           this.endpointSettings.push(new ApiGatewayEndpointThrottlingSettings(functionName, event, this))
         }
       }
