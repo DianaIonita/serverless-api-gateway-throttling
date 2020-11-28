@@ -15,7 +15,7 @@ const hasCustomThrottlingConfig = event => {
 }
 
 class ApiGatewayEndpointThrottlingSettings {
-  constructor(functionName, event, globalSettings) {
+  constructor(functionName, event) {
     this.functionName = functionName;
 
     if (typeof (event.http) === 'string') {
@@ -28,14 +28,8 @@ class ApiGatewayEndpointThrottlingSettings {
       this.method = event.http.method;
     }
 
-    if (event.http.throttling.isEmpty) {
-      this.maxRequestsPerSecond = -1
-      this.maxConcurrentRequests = -1
-    }
-    else {
-      this.maxRequestsPerSecond = get(event.http.throttling, 'maxRequestsPerSecond', globalSettings.maxRequestsPerSecond);
-      this.maxConcurrentRequests = get(event.http.throttling, 'maxConcurrentRequests', globalSettings.maxConcurrentRequests);
-    }
+    this.maxRequestsPerSecond = get(event.http.throttling, 'maxRequestsPerSecond', -1);
+    this.maxConcurrentRequests = get(event.http.throttling, 'maxConcurrentRequests', -1);
   }
 }
 class ApiGatewayThrottlingSettings {
