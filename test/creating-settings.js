@@ -133,7 +133,7 @@ describe('Creating throttling settings', () => {
 
         // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
         // Define -1 as default to disable throttling if no custom settings found
-        describe('apply defaults for the http endpoint without custom settings (disable throttling)', () => {
+        describe('disable throttling for the http endpoint without custom settings', () => {
           let endpointSettings;
           before(() => {
             endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
