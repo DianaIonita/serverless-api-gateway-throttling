@@ -10,10 +10,6 @@ const isApiGatewayEndpoint = event => {
   return event.http ? true : false;
 }
 
-const hasCustomThrottlingConfig = event => {
-  return event.http.throttling != undefined;
-}
-
 class ApiGatewayEndpointThrottlingSettings {
   constructor(functionName, event) {
     this.functionName = functionName;
