@@ -132,7 +132,7 @@ describe('Creating throttling settings', () => {
         })
 
         // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
-        // Define -1 as default to disable throttling if no custom settings found
+        // Define -1 as default to disable throttling if no custom settings is found
         describe('for the http endpoint without custom throttling settings', () => {
           let endpointSettings;
           before(() => {
@@ -236,6 +236,8 @@ describe('Creating throttling settings', () => {
       endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
     });
 
+    // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
+    // Define -1 as default to disable throttling if no custom settings is found
     it('maxRequestsPerSecond should be not set', () => {
       expect(endpointSettings.maxRequestsPerSecond).to.equal(-1);
     });
