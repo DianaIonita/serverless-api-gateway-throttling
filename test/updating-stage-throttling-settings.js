@@ -119,7 +119,7 @@ describe('Updating stage throttling settings', () => {
         expect(apiGatewayRequest.properties.stageName).to.equal(stage);
       });
 
-      it('should specify two patch operations per endpoint with custom throttling settings and two patch operations for the stage', () => {
+      it('should specify two patch operations for each http endpoint and two patch operations for the stage', () => {
         expect(apiGatewayRequest.properties.patchOperations).to.have.lengthOf(8);
       });
 
@@ -209,7 +209,7 @@ describe('Updating stage throttling settings', () => {
         expect(apiGatewayRequest.properties.stageName).to.equal(stage);
       });
 
-      it('should specify two patch operations per endpoint with custom throttling settings and two patch operations for the stage', () => {
+      it('should specify two patch operations for each http endpoint and two patch operations for the stage', () => {
         expect(apiGatewayRequest.properties.patchOperations).to.have.lengthOf(6);
       });
 

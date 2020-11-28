@@ -108,7 +108,7 @@ describe('Creating throttling settings', () => {
           throttlingSettings = createSettingsFor(serverless);
         });
 
-        it('should create throttling settings only for the http endpoints with custom throttling configuration', () => {
+        it('should create throttling settings only for the http endpoints', () => {
           expect(throttlingSettings.endpointSettings).to.have.lengthOf(2);
         });
 
@@ -133,7 +133,7 @@ describe('Creating throttling settings', () => {
 
         // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
         // Define -1 as default to disable throttling if no custom settings found
-        describe('disable throttling for the http endpoint without custom settings', () => {
+        describe('for the http endpoint without custom throttling settings', () => {
           let endpointSettings;
           before(() => {
             endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
@@ -221,6 +221,27 @@ describe('Creating throttling settings', () => {
       it('should use the region from command line', () => {
         expect(throttlingSettings.region).to.equal('someotherregion');
       });
+    });
+  });
+  describe('when a http endpoint is defined in shorthand', () => {
+    let endpointSettings;
+    before(() => {
+      let endpoint = given.a_serverless_function('list-items')
+        .withHttpEndpointInShorthand('get /items');
+      serverless = given.a_serverless_instance()
+        .withApiGatewayThrottlingConfig()
+        .withFunction(endpoint);
+
+      throttlingSettings = createSettingsFor(serverless);
+      endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
+    });
+
+    it('maxRequestsPerSecond should be not set', () => {
+      expect(endpointSettings.maxRequestsPerSecond).to.equal(-1);
+    });
+
+    it('maxConcurrentRequests should be not set', () => {
+      expect(endpointSettings.maxConcurrentRequests).to.equal(-1);
     });
   });
 });
