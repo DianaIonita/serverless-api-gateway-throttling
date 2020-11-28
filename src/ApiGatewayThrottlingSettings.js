@@ -27,7 +27,8 @@ class ApiGatewayEndpointThrottlingSettings {
       this.path = event.http.path;
       this.method = event.http.method;
     }
-
+// https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
+// Define -1 as default to prevent leaving previously created method throttling settings
     this.maxRequestsPerSecond = get(event.http.throttling, 'maxRequestsPerSecond', -1);
     this.maxConcurrentRequests = get(event.http.throttling, 'maxConcurrentRequests', -1);
   }
