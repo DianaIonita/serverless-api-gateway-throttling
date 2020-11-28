@@ -120,7 +120,7 @@ describe('Updating stage throttling settings', () => {
       });
 
       it('should specify two patch operations per endpoint with custom throttling settings and two patch operations for the stage', () => {
-        expect(apiGatewayRequest.properties.patchOperations).to.have.lengthOf(6);
+        expect(apiGatewayRequest.properties.patchOperations).to.have.lengthOf(8);
       });
 
       it('should set the rate limit for the stage', () => {

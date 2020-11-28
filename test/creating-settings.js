@@ -87,7 +87,6 @@ describe('Creating throttling settings', () => {
             .withApiGatewayThrottlingConfig(globalThrottlingConfig)
             .withFunction(given.a_serverless_function('list-items'))
             .withFunction(given.a_serverless_function('get-item'));
-
           throttlingSettings = createSettingsFor(serverless);
         });
 
@@ -110,7 +109,7 @@ describe('Creating throttling settings', () => {
         });
 
         it('should create throttling settings only for the http endpoints with custom throttling configuration', () => {
-          expect(throttlingSettings.endpointSettings).to.have.lengthOf(1);
+          expect(throttlingSettings.endpointSettings).to.have.lengthOf(2);
         });
 
         it('should not create throttling settings for the function without an http endpoint', () => {
@@ -129,6 +128,20 @@ describe('Creating throttling settings', () => {
 
           it('maxConcurrentRequests should be set', () => {
             expect(endpointSettings.maxConcurrentRequests).to.equal(200);
+          });
+        })
+        describe('for the http endpoint without custom settings - apply defaults', () => {
+          let endpointSettings;
+          before(() => {
+            endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
+          });
+
+          it('maxRequestsPerSecond should be not set', () => {
+            expect(endpointSettings.maxRequestsPerSecond).to.equal(-1);
+          });
+
+          it('maxConcurrentRequests should be not set', () => {
+            expect(endpointSettings.maxConcurrentRequests).to.equal(-1);
           });
         });
       });
@@ -205,22 +218,6 @@ describe('Creating throttling settings', () => {
       it('should use the region from command line', () => {
         expect(throttlingSettings.region).to.equal('someotherregion');
       });
-    });
-  });
-
-  describe('when a http endpoint is defined in shorthand', () => {
-    before(() => {
-      let endpoint = given.a_serverless_function('list-items')
-        .withHttpEndpointInShorthand('get /items');
-      serverless = given.a_serverless_instance()
-        .withApiGatewayThrottlingConfig()
-        .withFunction(endpoint);
-
-      throttlingSettings = createSettingsFor(serverless);
-    });
-
-    it('should not create throttling settings for the http endpoint', () => {
-      expect(throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items')).to.not.exist;
     });
   });
 });
