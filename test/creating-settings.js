@@ -130,7 +130,10 @@ describe('Creating throttling settings', () => {
             expect(endpointSettings.maxConcurrentRequests).to.equal(200);
           });
         })
-        describe('for the http endpoint without custom settings - apply defaults', () => {
+
+        // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
+        // Define -1 as default to disable throttling if no custom settings found
+        describe('apply defaults for the http endpoint without custom settings (disable throttling)', () => {
           let endpointSettings;
           before(() => {
             endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
