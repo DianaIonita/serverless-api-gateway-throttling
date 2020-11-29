@@ -139,11 +139,11 @@ describe('Creating throttling settings', () => {
             endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
           });
 
-          it('maxRequestsPerSecond should be not set', () => {
+          it('maxRequestsPerSecond should be -1', () => {
             expect(endpointSettings.maxRequestsPerSecond).to.equal(-1);
           });
 
-          it('maxConcurrentRequests should be not set', () => {
+          it('maxConcurrentRequests should be -1', () => {
             expect(endpointSettings.maxConcurrentRequests).to.equal(-1);
           });
         });
@@ -162,6 +162,44 @@ describe('Creating throttling settings', () => {
 
         it('should create throttling settings for all endpoint definitions', () => {
           expect(throttlingSettings.endpointSettings).to.have.lengthOf(2);
+        });
+      });
+
+      describe('and one function has defined only maxRequestsPerSecond', () => {
+        before(() => {
+          serverless = given.a_serverless_instance()
+            .withApiGatewayThrottlingConfig(globalThrottlingConfig)
+            .withFunction(given.a_serverless_function('list-items')
+              .withHttpEndpoint('get', '/items', { maxRequestsPerSecond: 500 }));
+
+          throttlingSettings = createSettingsFor(serverless);
+        });
+
+        it('should set maxRequestsPerSecond correctly', () => {
+          expect(throttlingSettings.endpointSettings[0].maxRequestsPerSecond).to.equal(500);
+        });
+
+        it('should inherit maxConcurrentRequests from global settings', () => {
+          expect(throttlingSettings.endpointSettings[0].maxConcurrentRequests).to.equal(globalThrottlingConfig.maxConcurrentRequests);
+        });
+      });
+
+      describe('and one function has defined only maxConcurrentRequests', () => {
+        before(() => {
+          serverless = given.a_serverless_instance()
+            .withApiGatewayThrottlingConfig(globalThrottlingConfig)
+            .withFunction(given.a_serverless_function('list-items')
+              .withHttpEndpoint('get', '/items', { maxConcurrentRequests: 500 }));
+
+          throttlingSettings = createSettingsFor(serverless);
+        });
+
+        it('should set maxConcurrentRequests correctly', () => {
+          expect(throttlingSettings.endpointSettings[0].maxConcurrentRequests).to.equal(500);
+        });
+
+        it('should inherit maxRequestsPerSecond from global settings', () => {
+          expect(throttlingSettings.endpointSettings[0].maxRequestsPerSecond).to.equal(globalThrottlingConfig.maxRequestsPerSecond);
         });
       });
     });
@@ -223,6 +261,7 @@ describe('Creating throttling settings', () => {
       });
     });
   });
+
   describe('when a http endpoint is defined in shorthand', () => {
     let endpointSettings;
     before(() => {
@@ -238,11 +277,11 @@ describe('Creating throttling settings', () => {
 
     // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
     // Define -1 as default to disable throttling if no custom settings is found
-    it('maxRequestsPerSecond should be not set', () => {
+    it('maxRequestsPerSecond should be -1', () => {
       expect(endpointSettings.maxRequestsPerSecond).to.equal(-1);
     });
 
-    it('maxConcurrentRequests should be not set', () => {
+    it('maxConcurrentRequests should be -1', () => {
       expect(endpointSettings.maxConcurrentRequests).to.equal(-1);
     });
   });

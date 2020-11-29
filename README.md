@@ -20,13 +20,14 @@ plugins:
   - serverless-api-gateway-throttling
 
 custom:
-  # Configures throttling settings for all http endpoints
+  # Configures throttling settings for the API Gateway stage
+  # They apply to all http endpoints, unless specifically overridden
   apiGatewayThrottling:
     maxRequestsPerSecond: 1000
     maxConcurrentRequests: 500
 
 functions:
-  # Throttling settings are inherited from global settings
+  # Throttling settings are inherited from stage settings
   update-item:
     handler: rest_api/item/post/handler.handle
     events:
@@ -49,7 +50,7 @@ functions:
   get-item:
     handler: rest_api/items/get/handler.handle
     events:
-      - http: # throttling settings are inherited from global settings
+      - http: # throttling settings are inherited from stage settings
           path: /item/{itemId}
           method: get
       - http:
@@ -58,4 +59,21 @@ functions:
           throttling:
             maxRequestsPerSecond: 2000
             maxConcurrentRequests: 1000
+
+  # Requests are throttled for both endpoints
+  get-blue-item:
+    handler: rest_api/items/blue/get/handler.handle
+    events:
+      - http:
+          path: /item/blue/{itemId}
+          method: get
+          throttling:
+            maxRequestsPerSecond: 300
+            # maxConcurrentRequests are inherited from stage settings
+      - http:
+          path: /item/dark-blue/{itemId}
+          method: get
+          throttling:
+            # maxRequestsPerSecond are inherited from stage settings
+            maxConcurrentRequests: 300
 ```

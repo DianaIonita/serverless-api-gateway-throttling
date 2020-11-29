@@ -11,7 +11,7 @@ const isApiGatewayEndpoint = event => {
 }
 
 class ApiGatewayEndpointThrottlingSettings {
-  constructor(functionName, event) {
+  constructor(functionName, event, globalSettings) {
     this.functionName = functionName;
 
     if (typeof (event.http) === 'string') {
@@ -23,10 +23,17 @@ class ApiGatewayEndpointThrottlingSettings {
       this.path = event.http.path;
       this.method = event.http.method;
     }
+
     // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
     // Define -1 as default to disable throttling if no custom settings is found
-    this.maxRequestsPerSecond = get(event.http.throttling, 'maxRequestsPerSecond', -1);
-    this.maxConcurrentRequests = get(event.http.throttling, 'maxConcurrentRequests', -1);
+    if (!event.http.throttling) {
+      this.maxConcurrentRequests = -1;
+      this.maxRequestsPerSecond = -1;
+    }
+    else {
+      this.maxRequestsPerSecond = get(event.http.throttling, 'maxRequestsPerSecond', globalSettings.maxRequestsPerSecond);
+      this.maxConcurrentRequests = get(event.http.throttling, 'maxConcurrentRequests', globalSettings.maxConcurrentRequests);
+    }
   }
 }
 class ApiGatewayThrottlingSettings {
