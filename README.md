@@ -1,5 +1,6 @@
 # serverless-api-gateway-throttling
 
+![npm](https://img.shields.io/npm/v/serverless-api-gateway-throttling.svg)
 [![CircleCI](https://circleci.com/gh/DianaIonita/serverless-api-gateway-throttling.svg?style=svg)](https://circleci.com/gh/DianaIonita/serverless-api-gateway-throttling)
 
 ## Intro
