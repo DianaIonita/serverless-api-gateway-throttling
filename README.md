@@ -1,7 +1,8 @@
 # serverless-api-gateway-throttling
 
-![npm](https://img.shields.io/npm/v/serverless-api-gateway-throttling.svg)
 [![CircleCI](https://circleci.com/gh/DianaIonita/serverless-api-gateway-throttling.svg?style=svg)](https://circleci.com/gh/DianaIonita/serverless-api-gateway-throttling)
+![npm](https://img.shields.io/npm/v/serverless-api-gateway-throttling.svg)
+[![npm downloads](https://img.shields.io/npm/dt/serverless-api-gateway-throttling.svg?style=svg)](https://www.npmjs.com/package/serverless-api-gateway-throttling)
 
 ## Intro
 A plugin for the Serverless framework which configures throttling for API Gateway endpoints.
