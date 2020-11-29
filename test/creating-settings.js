@@ -87,7 +87,6 @@ describe('Creating throttling settings', () => {
             .withApiGatewayThrottlingConfig(globalThrottlingConfig)
             .withFunction(given.a_serverless_function('list-items'))
             .withFunction(given.a_serverless_function('get-item'));
-
           throttlingSettings = createSettingsFor(serverless);
         });
 
@@ -109,8 +108,8 @@ describe('Creating throttling settings', () => {
           throttlingSettings = createSettingsFor(serverless);
         });
 
-        it('should create throttling settings only for the http endpoints with custom throttling configuration', () => {
-          expect(throttlingSettings.endpointSettings).to.have.lengthOf(1);
+        it('should create throttling settings only for the http endpoints', () => {
+          expect(throttlingSettings.endpointSettings).to.have.lengthOf(2);
         });
 
         it('should not create throttling settings for the function without an http endpoint', () => {
@@ -129,6 +128,23 @@ describe('Creating throttling settings', () => {
 
           it('maxConcurrentRequests should be set', () => {
             expect(endpointSettings.maxConcurrentRequests).to.equal(200);
+          });
+        })
+
+        // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
+        // Define -1 as default to disable throttling if no custom settings is found
+        describe('for the http endpoint without custom throttling settings', () => {
+          let endpointSettings;
+          before(() => {
+            endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
+          });
+
+          it('maxRequestsPerSecond should be not set', () => {
+            expect(endpointSettings.maxRequestsPerSecond).to.equal(-1);
+          });
+
+          it('maxConcurrentRequests should be not set', () => {
+            expect(endpointSettings.maxConcurrentRequests).to.equal(-1);
           });
         });
       });
@@ -207,8 +223,8 @@ describe('Creating throttling settings', () => {
       });
     });
   });
-
   describe('when a http endpoint is defined in shorthand', () => {
+    let endpointSettings;
     before(() => {
       let endpoint = given.a_serverless_function('list-items')
         .withHttpEndpointInShorthand('get /items');
@@ -217,10 +233,17 @@ describe('Creating throttling settings', () => {
         .withFunction(endpoint);
 
       throttlingSettings = createSettingsFor(serverless);
+      endpointSettings = throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items');
     });
 
-    it('should not create throttling settings for the http endpoint', () => {
-      expect(throttlingSettings.endpointSettings.find(e => e.functionName == 'list-items')).to.not.exist;
+    // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
+    // Define -1 as default to disable throttling if no custom settings is found
+    it('maxRequestsPerSecond should be not set', () => {
+      expect(endpointSettings.maxRequestsPerSecond).to.equal(-1);
+    });
+
+    it('maxConcurrentRequests should be not set', () => {
+      expect(endpointSettings.maxConcurrentRequests).to.equal(-1);
     });
   });
 });
