@@ -1,6 +1,6 @@
 {
   "name": "serverless-api-gateway-throttling",
-  "version": "1.1.1-rc1",
+  "version": "1.1.1",
   "description": "A plugin for the Serverless framework which configures throttling for API Gateway endpoints.",
   "main": "src/apiGatewayThrottlingPlugin.js",
   "scripts": {
