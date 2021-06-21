@@ -11,7 +11,7 @@ class ApiGatewayThrottlingPlugin {
 
     this.hooks = {
       'before:package:initialize': this.createSettings.bind(this),
-      'before:package:finalize': this.outputRestApiId.bind(this),
+      'before:package:finalize': this.updateCloudFormationTemplate.bind(this),
       'after:aws:deploy:finalize:cleanup': this.updateStage.bind(this),
     };
 
@@ -22,7 +22,13 @@ class ApiGatewayThrottlingPlugin {
     this.settings = new ApiGatewayThrottlingSettings(this.serverless, this.options);
   }
 
-  outputRestApiId() {
+  updateCloudFormationTemplate() {
+    this.thereIsARestApi = restApiExists(this.serverless);
+    if (!this.thereIsARestApi) {
+      this.serverless.cli.log(`[serverless-api-gateway-caching] No REST API found. Throttling settings will be ignored.`);
+      return;
+    }
+
     outputRestApiIdTo(this.serverless);
   }
 
