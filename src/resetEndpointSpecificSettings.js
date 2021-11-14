@@ -1,36 +1,16 @@
 'use strict';
 
 const isEmpty = require('lodash.isempty');
-const { retrieveRestApiId } = require('./restApiId');
 const { httpEventOf, patchPathFor } = require('./lib');
+const { retrieveRestApiId } = require('./restApiId');
 const MAX_PATCH_OPERATIONS_PER_STAGE_UPDATE = 80;
 
-const createPatchForStage = (settings) => {
-  let patch = [{
-    op: 'replace',
-    path: '/*/*/throttling/rateLimit',
-    value: `${settings.maxRequestsPerSecond}`
-  },
-  {
-    op: 'replace',
-    path: '/*/*/throttling/burstLimit',
-    value: `${settings.maxConcurrentRequests}`
-  }];
-
-  return patch;
-}
-
-const patchForMethod = (path, method, endpointSettings) => {
+const patchForMethod = (path, method) => {
   let patchPath = patchPathFor(path, method);
   let patch = [{
-    op: 'replace',
-    path: `/${patchPath}/throttling/rateLimit`,
-    value: `${endpointSettings.maxRequestsPerSecond}`
-  },
-  {
-    op: 'replace',
-    path: `/${patchPath}/throttling/burstLimit`,
-    value: `${endpointSettings.maxConcurrentRequests}`
+    op: 'remove',
+    path: `/${patchPath}`,
+    value: ""
   }]
   return patch;
 }
@@ -53,11 +33,11 @@ const createPatchForEndpoint = (endpointSettings, serverless) => {
   if (method.toUpperCase() == 'ANY') {
     let httpMethodsToConfigureThrottlingFor = ['GET', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'];
     for (let methodWithThrottlingSettings of httpMethodsToConfigureThrottlingFor) {
-      patch = patch.concat(patchForMethod(path, methodWithThrottlingSettings, endpointSettings));
+      patch = patch.concat(patchForMethod(path, methodWithThrottlingSettings));
     };
   }
   else {
-    patch = patch.concat(patchForMethod(path, method, endpointSettings));
+    patch = patch.concat(patchForMethod(path, method));
   }
   return patch;
 }
@@ -80,21 +60,21 @@ const updateStageFor = async (serverless, params, stage, region) => {
   }
 
   for (let index in paramsInChunks) {
-    serverless.cli.log(`[serverless-api-gateway-throttling] Updating API Gateway throttling settings (${parseInt(index) + 1} of ${paramsInChunks.length}).`);
+    serverless.cli.log(`[serverless-api-gateway-throttling] Resetting API Gateway endpoint settings (${parseInt(index) + 1} of ${paramsInChunks.length}).`);
     await serverless.providers.aws.request('APIGateway', 'updateStage', paramsInChunks[index], stage, region);
   }
 
-  serverless.cli.log(`[serverless-api-gateway-throttling] Done updating API Gateway throttling settings.`);
+  serverless.cli.log(`[serverless-api-gateway-throttling] Done resetting API Gateway endpoint settings.`);
 }
 
-const updateStageThrottling = async (settings, serverless) => {
+const resetEndpointSpecificSettings = async (settings, serverless) => {
   if (isEmpty(settings)) {
     return;
   }
 
   const restApiId = await retrieveRestApiId(serverless, settings);
 
-  let patchOps = createPatchForStage(settings);
+  let patchOps = [];
 
   for (const endpointSettings of settings.endpointSettings) {
     const endpointPatch = createPatchForEndpoint(endpointSettings, serverless);
@@ -112,4 +92,4 @@ const updateStageThrottling = async (settings, serverless) => {
   await updateStageFor(serverless, params, stage, region);
 }
 
-module.exports = updateStageThrottling;
+module.exports = resetEndpointSpecificSettings;
