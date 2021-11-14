@@ -15,6 +15,13 @@ This plugin makes it easy to configure those limits.
 ## Good to know
 - if custom throttling settings are defined for an endpoint with HTTP method `ANY`, the settings will be applied to all methods: `GET`, `DELETE`, `HEAD`, `OPTIONS`, `PATCH`, `POST` and `PUT`.
 
+## How this plugin works
+It configures endpoints in the gateway to override the settings they inherit from the stage.
+If you need reset all endpoints to inherit their settings from the stage again (as seen [in this issue](https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/16)), you can do this:
+```
+sls reset-all-endpoint-settings
+```
+
 ## Examples
 
 ```yml
@@ -78,4 +85,14 @@ functions:
           throttling:
             # maxRequestsPerSecond are inherited from stage settings
             maxConcurrentRequests: 300
+
+  # Throttling is disabled for this endpoint
+  list-all-items:
+    handler: rest_api/items/get/handler.handle
+    events:
+      - http:
+          path: /items
+          method: get
+          throttling:
+            disabled: true
 ```
