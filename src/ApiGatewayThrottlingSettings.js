@@ -24,9 +24,10 @@ class ApiGatewayEndpointThrottlingSettings {
       this.method = event.http.method;
     }
 
-    // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
-    // Define -1 as default to disable throttling if no custom settings is found
-    if (!event.http.throttling) {
+    const throttlingDisabled = get(event.http.throttling, 'disabled') == true;
+    if (throttlingDisabled) {
+      // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
+      // -1 disables for a specific endpoint
       this.maxConcurrentRequests = -1;
       this.maxRequestsPerSecond = -1;
     }

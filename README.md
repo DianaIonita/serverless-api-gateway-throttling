@@ -78,4 +78,14 @@ functions:
           throttling:
             # maxRequestsPerSecond are inherited from stage settings
             maxConcurrentRequests: 300
+
+  # Throttling is disabled for this endpoint
+  list-all-items:
+    handler: rest_api/items/get/handler.handle
+    events:
+      - http:
+          path: /items
+          method: get
+          throttling:
+            disabled: true
 ```
