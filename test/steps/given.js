@@ -16,11 +16,15 @@ const a_rest_api_id = () => {
   return chance.guid();
 }
 
-const a_deployed_rest_api_id = async (serverless, { stage, region } = {}) => {
+const a_deployed_rest_api_id = (serverless, { stage, region } = {}) => {
   const restApiId = a_rest_api_id();
   serverless.setDeployedRestApiId(restApiId, { stage, region });
 
   return restApiId;
+}
+
+const the_rest_api_id_is_not_set_for_deployment = (serverless, settings) => {
+  serverless.setDeployedRestApiId(undefined, settings);
 }
 
 const functions_with_custom_throttling_configuration = (endpointCount, throttlingConfiguration) => {
@@ -38,5 +42,6 @@ module.exports = {
   a_serverless_function,
   a_rest_api_id,
   a_deployed_rest_api_id,
+  the_rest_api_id_is_not_set_for_deployment,
   functions_with_custom_throttling_configuration
 }

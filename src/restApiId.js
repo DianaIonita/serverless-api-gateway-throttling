@@ -24,12 +24,9 @@ const restApiExists = async (serverless, settings) => {
   }
 
   if (settings) {
-    const stack = await getAlreadyDeployedStack(serverless, settings);
-    if (stack) {
-      const restApiIdFromAlreadyDeployedStack = await retrieveRestApiId(serverless, settings);
-      if (restApiIdFromAlreadyDeployedStack) {
-        return true;
-      }
+    const restApiIdFromAlreadyDeployedStack = await retrieveRestApiId(serverless, settings);
+    if (restApiIdFromAlreadyDeployedStack) {
+      return true;
     }
   }
   return false;
