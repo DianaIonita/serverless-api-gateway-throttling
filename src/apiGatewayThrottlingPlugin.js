@@ -80,6 +80,7 @@ class ApiGatewayThrottlingPlugin {
       type: 'object',
       properties: {
         apiGatewayThrottling: {
+          type: 'object',
           properties: {
             maxRequestsPerSecond: { type: 'number' },
             maxConcurrentRequests: { type: 'number' }
@@ -93,6 +94,7 @@ class ApiGatewayThrottlingPlugin {
       type: 'object',
       properties: {
         throttling: {
+          type: 'object',
           properties: {
             maxRequestsPerSecond: { type: 'number' },
             maxConcurrentRequests: { type: 'number' }
