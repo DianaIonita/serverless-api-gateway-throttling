@@ -35,11 +35,19 @@ class ApiGatewayThrottlingPlugin {
   async updateCloudFormationTemplate() {
     this.thereIsARestApi = await restApiExists(this.serverless);
     if (!this.thereIsARestApi) {
-      this.serverless.cli.log(`[serverless-api-gateway-throttling] No REST API found. Throttling settings will be ignored.`);
-      return;
+      this.serverless.cli.log(`[serverless-api-gateway-throttling] No REST API found. Throttling settings will be ignored for REST API endpoints.`);
+    }
+    else {
+      outputRestApiIdTo(this.serverless);
     }
 
-    outputRestApiIdTo(this.serverless);
+    this.thereIsAHttpApi = await httpApiExists(this.serverless);
+    if (!this.thereIsAHttpApi) {
+      this.serverless.cli.log(`[serverless-api-gateway-throttling] No HTTP API (API Gateway v2) found. Throttling settings will be ignored for HTTP API endpoints.`);
+    }
+    else {
+      outputHttpApiIdTo(this.serverless);
+    }
   }
 
   async updateStage() {
