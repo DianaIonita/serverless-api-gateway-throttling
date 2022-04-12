@@ -10,21 +10,25 @@ const isApiGatewayEndpoint = event => {
   return event.http ? true : false;
 }
 
+const isHttpApiEndpoint = event => {
+  return event.httpApi ? true : false;
+}
+
 class ApiGatewayEndpointThrottlingSettings {
-  constructor(functionName, event, globalSettings) {
+  constructor(functionName, event, eventType, globalSettings) {
     this.functionName = functionName;
 
-    if (typeof (event.http) === 'string') {
-      let parts = event.http.split(' ');
+    if (typeof (event[eventType]) === 'string') {
+      let parts = event[eventType].split(' ');
       this.method = parts[0];
       this.path = parts[1];
     }
     else {
-      this.path = event.http.path;
-      this.method = event.http.method;
+      this.path = event[eventType].path;
+      this.method = event[eventType].method;
     }
 
-    const throttlingDisabled = get(event.http.throttling, 'disabled') == true;
+    const throttlingDisabled = get(event[eventType].throttling, 'disabled') == true;
     if (throttlingDisabled) {
       // https://github.com/DianaIonita/serverless-api-gateway-throttling/issues/5
       // -1 disables for a specific endpoint
@@ -32,8 +36,8 @@ class ApiGatewayEndpointThrottlingSettings {
       this.maxRequestsPerSecond = -1;
     }
     else {
-      this.maxRequestsPerSecond = get(event.http.throttling, 'maxRequestsPerSecond', globalSettings.maxRequestsPerSecond);
-      this.maxConcurrentRequests = get(event.http.throttling, 'maxConcurrentRequests', globalSettings.maxConcurrentRequests);
+      this.maxRequestsPerSecond = get(event[eventType].throttling, 'maxRequestsPerSecond', globalSettings.maxRequestsPerSecond);
+      this.maxConcurrentRequests = get(event[eventType].throttling, 'maxConcurrentRequests', globalSettings.maxConcurrentRequests);
     }
   }
 }
@@ -53,7 +57,8 @@ class ApiGatewayThrottlingSettings {
     this.maxRequestsPerSecond = serverless.service.custom.apiGatewayThrottling.maxRequestsPerSecond || DEFAULT_MAX_REQUESTS_PER_SECOND;
     this.maxConcurrentRequests = serverless.service.custom.apiGatewayThrottling.maxConcurrentRequests || DEFAULT_MAX_CONCURRENT_REQUESTS;
 
-    this.endpointSettings = [];
+    this.restEndpointSettings = [];
+    this.httpApiEndpointSettings = [];
 
     for (let functionName in serverless.service.functions) {
       let functionSettings = serverless.service.functions[functionName];
@@ -62,7 +67,10 @@ class ApiGatewayThrottlingSettings {
       }
       for (let event of functionSettings.events) {
         if (isApiGatewayEndpoint(event)) {
-          this.endpointSettings.push(new ApiGatewayEndpointThrottlingSettings(functionName, event, this))
+          this.restEndpointSettings.push(new ApiGatewayEndpointThrottlingSettings(functionName, event, 'http', this))
+        }
+        if (isHttpApiEndpoint(event)) {
+          this.httpApiEndpointSettings.push(new ApiGatewayEndpointThrottlingSettings(functionName, event, 'httpApi', this))
         }
       }
     }

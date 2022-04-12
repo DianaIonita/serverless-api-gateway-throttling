@@ -96,8 +96,8 @@ const updateStageThrottling = async (settings, serverless) => {
 
   let patchOps = createPatchForStage(settings);
 
-  for (const endpointSettings of settings.endpointSettings) {
-    const endpointPatch = createPatchForEndpoint(endpointSettings, serverless);
+  for (const restEndpointSettings of settings.restEndpointSettings) {
+    const endpointPatch = createPatchForEndpoint(restEndpointSettings, serverless);
     patchOps = patchOps.concat(endpointPatch);
   }
 

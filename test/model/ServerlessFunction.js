@@ -51,6 +51,16 @@ class ServerlessFunction {
 
     return this;
   }
+
+  withHttpApiEndpointInShorthand(shorthand) {
+    let f = this.getFunction();
+    if (!f.events) { f.events = []; }
+    f.events.push({
+      httpApi: shorthand
+    });
+
+    return this;
+  }
 }
 
 module.exports = ServerlessFunction;
