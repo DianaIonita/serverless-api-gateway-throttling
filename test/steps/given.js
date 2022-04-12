@@ -4,44 +4,62 @@ const Serverless = require('../model/Serverless');
 const ServerlessFunction = require('../model/ServerlessFunction');
 const chance = require('chance').Chance();
 
-const a_serverless_instance = () => {
+const aServerlessInstance = () => {
   return new Serverless();
 }
 
-const a_serverless_function = name => {
+const aServerlessFunction = name => {
   return new ServerlessFunction(name);
 }
 
-const a_rest_api_id = () => {
+const aRestApiId = () => {
   return chance.guid();
 }
 
-const a_deployed_rest_api_id = (serverless, { stage, region } = {}) => {
-  const restApiId = a_rest_api_id();
+const aDeployedRestApiId = (serverless, { stage, region } = {}) => {
+  const restApiId = aRestApiId();
   serverless.setDeployedRestApiId(restApiId, { stage, region });
 
   return restApiId;
 }
 
-const the_rest_api_id_is_not_set_for_deployment = (serverless, settings) => {
+const theRestApiIdIsNotSetForDeployment = (serverless, settings) => {
   serverless.setDeployedRestApiId(undefined, settings);
 }
 
-const functions_with_custom_throttling_configuration = (endpointCount, throttlingConfiguration) => {
+const aHttpApiId = () => {
+  return chance.guid();
+}
+
+const aDeployedHttpApiId = (serverless, { stage, region } = {}) => {
+  const httpApiId = aHttpApiId();
+  serverless.setDeployedHttpApiId(httpApiId, { stage, region });
+
+  return httpApiId;
+}
+
+const theHttpApiIdIsNotSetForDeployment = (serverless, settings) => {
+  serverless.setDeployedHttpApiId(undefined, settings);
+}
+
+const functionsWithCustomThrottlingConfiguration = (endpointCount, throttlingConfiguration) => {
   let result = [];
   for (let i = 0; i < endpointCount; i++) {
     result.push(
-      a_serverless_function(chance.word())
-        .withHttpEndpoint('GET', `/${chance.word()}`, throttlingConfiguration));
+      aServerlessFunction(chance.word())
+        .withRestEndpoint('GET', `/${chance.word()}`, throttlingConfiguration));
   }
   return result;
 }
 
 module.exports = {
-  a_serverless_instance,
-  a_serverless_function,
-  a_rest_api_id,
-  a_deployed_rest_api_id,
-  the_rest_api_id_is_not_set_for_deployment,
-  functions_with_custom_throttling_configuration
+  aServerlessInstance,
+  aServerlessFunction,
+  aRestApiId,
+  aDeployedRestApiId,
+  theRestApiIdIsNotSetForDeployment,
+  aHttpApiId,
+  aDeployedHttpApiId,
+  theHttpApiIdIsNotSetForDeployment,
+  functionsWithCustomThrottlingConfiguration
 }

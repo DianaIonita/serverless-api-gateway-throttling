@@ -96,3 +96,7 @@ functions:
           throttling:
             disabled: true
 ```
+
+
+# TODO add support for shorthand
+# TODO update readme

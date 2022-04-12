@@ -14,7 +14,7 @@ describe('Updating stage throttling settings', () => {
 
   describe('when throttling settings are not defined', () => {
     before(async () => {
-      serverless = given.a_serverless_instance();
+      serverless = given.aServerlessInstance();
       await when_updating_stage_throttling_settings({}, serverless);
 
       requestsToAws = serverless.getRequestsToAws();
@@ -27,13 +27,13 @@ describe('Updating stage throttling settings', () => {
 
   describe('when there are no http endpoints with custom throttling configuration', () => {
     before(async () => {
-      serverless = given.a_serverless_instance()
+      serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
         .withApiGatewayThrottlingConfig(globalThrottlingSettings)
-        .withFunction(given.a_serverless_function('list-items'));
+        .withFunction(given.aServerlessFunction('list-items'));
       settings = new ApiGatewayThrottlingSettings(serverless);
 
-      restApiId = await given.a_deployed_rest_api_id(serverless, settings)
+      restApiId = await given.aDeployedRestApiId(serverless, settings)
 
       await when_updating_stage_throttling_settings(settings, serverless);
 
@@ -82,19 +82,19 @@ describe('Updating stage throttling settings', () => {
 
   describe('when there are some endpoints with custom throttling configuration', () => {
     before(async () => {
-      serverless = given.a_serverless_instance()
+      serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
         .withApiGatewayThrottlingConfig(globalThrottlingSettings)
-        .withFunction(given.a_serverless_function('list-items')
-          .withHttpEndpoint('get', '/items', { maxRequestsPerSecond: 200, maxConcurrentRequests: 100 }))
-        .withFunction(given.a_serverless_function('create-item')
-          .withHttpEndpoint('post', '/item/{itemId}', { maxRequestsPerSecond: 100, maxConcurrentRequests: 50 }))
-        .withFunction(given.a_serverless_function('delete-item')
-          .withHttpEndpoint('delete', '/item/{itemId}'));
+        .withFunction(given.aServerlessFunction('list-items')
+          .withRestEndpoint('get', '/items', { maxRequestsPerSecond: 200, maxConcurrentRequests: 100 }))
+        .withFunction(given.aServerlessFunction('create-item')
+          .withRestEndpoint('post', '/item/{itemId}', { maxRequestsPerSecond: 100, maxConcurrentRequests: 50 }))
+        .withFunction(given.aServerlessFunction('delete-item')
+          .withRestEndpoint('delete', '/item/{itemId}'));
 
       settings = new ApiGatewayThrottlingSettings(serverless);
 
-      restApiId = await given.a_deployed_rest_api_id(serverless, settings)
+      restApiId = await given.aDeployedRestApiId(serverless, settings)
 
       await when_updating_stage_throttling_settings(settings, serverless);
 
@@ -175,16 +175,16 @@ describe('Updating stage throttling settings', () => {
 
   describe('when there\'s a function with two http endpoints with custom throttling configuration', () => {
     before(async () => {
-      serverless = given.a_serverless_instance()
+      serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
         .withApiGatewayThrottlingConfig(globalThrottlingSettings)
-        .withFunction(given.a_serverless_function('list-items')
-          .withHttpEndpoint('get', '/items', { maxRequestsPerSecond: 200, maxConcurrentRequests: 100 })
-          .withHttpEndpoint('get', '/older/items', { maxRequestsPerSecond: 100, maxConcurrentRequests: 80 }));
+        .withFunction(given.aServerlessFunction('list-items')
+          .withRestEndpoint('get', '/items', { maxRequestsPerSecond: 200, maxConcurrentRequests: 100 })
+          .withRestEndpoint('get', '/older/items', { maxRequestsPerSecond: 100, maxConcurrentRequests: 80 }));
 
       settings = new ApiGatewayThrottlingSettings(serverless);
 
-      restApiId = await given.a_deployed_rest_api_id(serverless, settings)
+      restApiId = await given.aDeployedRestApiId(serverless, settings)
 
       await when_updating_stage_throttling_settings(settings, serverless);
 
@@ -265,15 +265,15 @@ describe('Updating stage throttling settings', () => {
 
   describe('when there\'s an endpoint with http method ANY with custom throttling configuration', () => {
     before(async () => {
-      serverless = given.a_serverless_instance()
+      serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
         .withApiGatewayThrottlingConfig(globalThrottlingSettings)
-        .withFunction(given.a_serverless_function('do-anything-to-item')
-          .withHttpEndpoint('any', '/item', { maxRequestsPerSecond: 500, maxConcurrentRequests: 250 }));
+        .withFunction(given.aServerlessFunction('do-anything-to-item')
+          .withRestEndpoint('any', '/item', { maxRequestsPerSecond: 500, maxConcurrentRequests: 250 }));
 
       settings = new ApiGatewayThrottlingSettings(serverless);
 
-      restApiId = await given.a_deployed_rest_api_id(serverless, settings)
+      restApiId = await given.aDeployedRestApiId(serverless, settings)
 
       await when_updating_stage_throttling_settings(settings, serverless);
 
@@ -309,9 +309,9 @@ describe('Updating stage throttling settings', () => {
   describe('when there are many, many http endpoints with custom throttling configuration', () => {
     let requestsToAwsToUpdateStage;
     before(async () => {
-      let functions = given.functions_with_custom_throttling_configuration(40, { maxRequestsPerSecond: 300, maxConcurrentRequests: 200 });
+      let functions = given.functionsWithCustomThrottlingConfiguration(40, { maxRequestsPerSecond: 300, maxConcurrentRequests: 200 });
 
-      serverless = given.a_serverless_instance()
+      serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
         .withApiGatewayThrottlingConfig(globalThrottlingSettings);
 
@@ -321,7 +321,7 @@ describe('Updating stage throttling settings', () => {
 
       settings = new ApiGatewayThrottlingSettings(serverless);
 
-      restApiId = await given.a_deployed_rest_api_id(serverless, settings)
+      restApiId = await given.aDeployedRestApiId(serverless, settings)
 
       await when_updating_stage_throttling_settings(settings, serverless);
 

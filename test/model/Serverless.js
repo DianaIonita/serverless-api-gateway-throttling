@@ -1,6 +1,7 @@
 'use strict';
 
 class Serverless {
+  stackName = 'serverless-stack-name';
   constructor() {
     this._recordedAwsRequests = [];
     this._logMessages = [];
@@ -19,6 +20,19 @@ class Serverless {
       },
       getFunction(functionName) {
         return this.functions[functionName];
+      }
+    }
+    this.providers = {
+      aws: {
+        naming: {
+          getStackName: (stage) => {
+            if (stage != this.service.provider.stage) {
+              throw new Error('[Serverless Test Model] Something went wrong getting the Stack Name');
+            }
+            return this.stackName;
+          }
+        },
+        request: () => { return { Stacks: [{ Outputs: [] }] } }
       }
     }
   }
@@ -49,8 +63,15 @@ class Serverless {
     let functionName = Object.keys(serverlessFunction)[0];
     this.service.functions[functionName] = serverlessFunction[functionName];
 
-    // when a function with an http endpoint is defined, serverless creates an ApiGatewayRestApi resource
-    this.service.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'] = {};
+    if (serverlessFunction.events && serverlessFunction.events.find(e => e.http)) {
+      // when a function with an http endpoint is defined, serverless creates an ApiGatewayRestApi resource
+      this.service.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'] = {};
+    }
+
+    if (serverlessFunction.events && serverlessFunction.events.find(e => e.httpApi)) {
+      // when a function with an httpApi endpoint is defined, serverless creates a HttpApi resource
+      this.service.provider.compiledCloudFormationTemplate.Resources['HttpApi'] = {};
+    }
     return this;
   }
 
@@ -62,37 +83,69 @@ class Serverless {
     return this;
   }
 
+  withARestApiInCloudFormation() {
+    this.service.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'] = {};
+    return this;
+  }
+
+  withDeployedRestApiId(restApiId, settings) {
+    this.setDeployedRestApiId(restApiId, settings);
+    return this;
+  }
+
   setDeployedRestApiId(restApiId, settings) {
-    const stackName = 'serverless-stack-name';
-    this.providers = {
-      aws: {
-        naming: {
-          getStackName: (stage) => {
-            if (stage != settings.stage) {
-              throw new Error('[Serverless Test Model] Something went wrong getting the Stack Name');
-            }
-            return stackName;
-          }
-        },
-        request: async (awsService, method, properties, stage, region) => {
-          this._recordedAwsRequests.push({ awsService, method, properties, stage, region });
-          if (awsService == 'CloudFormation'
-            && method == 'describeStacks'
-            && properties.StackName == stackName
-            && stage == settings.stage
-            && region == settings.region) {
-            return {
-              Stacks: [{
-                Outputs: [{
-                  OutputKey: 'RestApiIdForApigThrottling',
-                  OutputValue: restApiId
-                }]
+    this.providers.aws.request =
+      async (awsService, method, properties, stage, region) => {
+        this._recordedAwsRequests.push({ awsService, method, properties, stage, region });
+        if (awsService == 'CloudFormation'
+          && method == 'describeStacks'
+          && properties.StackName == this.stackName
+          && stage == settings.stage
+          && region == settings.region) {
+          return {
+            Stacks: [{
+              Outputs: [{
+                OutputKey: 'RestApiIdForApigThrottling',
+                OutputValue: restApiId
               }]
-            };
-          }
+            }]
+          };
         }
       }
+  }
+
+  withPredefinedHttpApiId(httpApiId) {
+    if (!this.service.provider.httpApi) {
+      this.service.provider.httpApi = {}
     }
+    this.service.provider.httpApi.id = httpApiId;
+    return this;
+  }
+
+  withAHttpApiInCloudFormation() {
+    this.service.provider.compiledCloudFormationTemplate.Resources['HttpApi'] = {};
+    return this;
+  }
+
+  setDeployedHttpApiId(httpApiId, settings) {
+    this.providers.aws.request =
+      async (awsService, method, properties, stage, region) => {
+        this._recordedAwsRequests.push({ awsService, method, properties, stage, region });
+        if (awsService == 'CloudFormation'
+          && method == 'describeStacks'
+          && properties.StackName == this.stackName
+          && stage == settings.stage
+          && region == settings.region) {
+          return {
+            Stacks: [{
+              Outputs: [{
+                OutputKey: 'HttpApiIdForApigThrottling',
+                OutputValue: httpApiId
+              }]
+            }]
+          };
+        }
+      }
   }
 
   getRequestsToAws() {
