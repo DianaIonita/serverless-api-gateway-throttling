@@ -309,7 +309,7 @@ describe('Updating stage throttling settings for a REST API', () => {
   describe('when there are many, many http endpoints with custom throttling configuration', () => {
     let requestsToAwsToUpdateStage;
     before(async () => {
-      let functions = given.functionsWithCustomThrottlingConfiguration(40, { maxRequestsPerSecond: 300, maxConcurrentRequests: 200 });
+      let functions = given.functionsWithCustomThrottlingConfiguration(50, { maxRequestsPerSecond: 300, maxConcurrentRequests: 200 });
 
       serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
