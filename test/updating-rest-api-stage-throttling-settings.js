@@ -1,6 +1,6 @@
 'use strict';
 
-const given = require('../test/steps/given');
+const given = require('./steps/given');
 const ApiGatewayThrottlingSettings = require('../src/ApiGatewayThrottlingSettings');
 const updateStageThrottling = require('../src/updateStageThrottling');
 const expect = require('chai').expect;
@@ -8,7 +8,7 @@ const expect = require('chai').expect;
 const API_GATEWAY = 'APIGateway', UPDATE_STAGE = 'updateStage';
 const stage = 'devstage', region = 'eu-west-1';
 
-describe('Updating stage throttling settings', () => {
+describe('Updating stage throttling settings for a REST API', () => {
   let serverless, settings, requestsToAws, restApiId, apiGatewayRequest;
   let globalThrottlingSettings = { maxRequestsPerSecond: 1000, maxConcurrentRequests: 500 };
 
