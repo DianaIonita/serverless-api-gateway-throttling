@@ -3,6 +3,11 @@ const { retrieveHttpApiId } = require('./httpApiId');
 const { httpApiEventOf } = require('./lib');
 
 const updateHttpApi = async (settings, serverless) => {
+    if (!settings.httpApiEndpointSettings || settings.httpApiEndpointSettings.length == 0) {
+        serverless.cli.log(`[serverless-api-gateway-throttling] No HTTP API endpoints found.`);
+        return;
+    }
+
     const httpApiId = await retrieveHttpApiId(serverless, settings);
 
     let httpApiRouteSettings = {};

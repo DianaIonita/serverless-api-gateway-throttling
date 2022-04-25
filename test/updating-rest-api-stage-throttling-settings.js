@@ -326,7 +326,7 @@ describe('Updating stage throttling settings for a REST API', () => {
       await when_updating_stage_throttling_settings(settings, serverless);
 
       requestsToAws = serverless.getRequestsToAws();
-      requestsToAwsToUpdateStage = requestsToAws.filter(r => r.method == UPDATE_STAGE);
+      requestsToAwsToUpdateStage = requestsToAws.filter(r => r.method == UPDATE_STAGE && r.awsService == API_GATEWAY);
     });
 
     it('should send two requests to update stage', () => {
