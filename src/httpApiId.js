@@ -4,11 +4,6 @@ const get = require('lodash.get');
 const HTTP_API_ID_KEY = 'HttpApiIdForApigThrottling';
 
 const getConfiguredHttpApiId = (serverless) => {
-  let httpApiId = get(settings, 'httpApiId');
-  if (httpApiId) {
-    return httpApiId;
-  }
-
   return get(serverless, 'service.provider.httpApi.id')
 }
 
@@ -60,10 +55,6 @@ const getAlreadyDeployedStack = async (serverless, settings) => {
 }
 
 const retrieveHttpApiId = async (serverless, settings) => {
-  if (settings.httpApiId) {
-    return settings.httpApiId;
-  }
-
   const stack = await getAlreadyDeployedStack(serverless, settings);
   const outputs = stack.Stacks[0].Outputs;
   const restApiKey = outputs.find(({ OutputKey }) => OutputKey === HTTP_API_ID_KEY)

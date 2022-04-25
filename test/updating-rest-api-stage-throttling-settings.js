@@ -359,5 +359,5 @@ describe('Updating stage throttling settings for a REST API', () => {
 });
 
 const when_updating_stage_throttling_settings = async (settings, serverless) => {
-  return await updateStageThrottling(settings, serverless);
+  return await updateStageThrottling(serverless, settings);
 }

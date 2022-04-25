@@ -38,16 +38,16 @@ const httpEventOf = (lambda, endpointSettings) => {
 const httpApiEventOf = (lambda, endpointSettings) => {
   let httpApiEvents = lambda.events.filter(e => e.httpApi != undefined)
     .map(e => {
-      if (typeof (e.http) === 'string') {
-        let parts = e.http.split(' ');
+      if (typeof (e.httpApi) === 'string') {
+        let parts = e.httpApi.split(' ');
         return {
           method: parts[0],
           path: parts[1]
         }
       } else {
         return {
-          method: e.http.method,
-          path: e.http.path
+          method: e.httpApi.method,
+          path: e.httpApi.path
         }
       }
     });

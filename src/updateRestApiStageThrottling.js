@@ -42,11 +42,11 @@ const updateStageFor = async (serverless, params, stage, region) => {
     }
 
     for (let index in paramsInChunks) {
-        serverless.cli.log(`[serverless-api-gateway-throttling] Updating API Gateway throttling settings (${parseInt(index) + 1} of ${paramsInChunks.length}).`);
+        serverless.cli.log(`[serverless-api-gateway-throttling] Updating API Gateway REST API throttling settings (${parseInt(index) + 1} of ${paramsInChunks.length}).`);
         await serverless.providers.aws.request('APIGateway', 'updateStage', paramsInChunks[index], stage, region);
     }
 
-    serverless.cli.log(`[serverless-api-gateway-throttling] Done updating API Gateway throttling settings.`);
+    serverless.cli.log(`[serverless-api-gateway-throttling] Done updating API Gateway REST API throttling settings.`);
 }
 
 const createPatchForRestEndpoint = (endpointSettings, serverless) => {

@@ -4,7 +4,7 @@ const isEmpty = require('lodash.isempty');
 const { updateRestApi } = require('./updateRestApiStageThrottling');
 const { updateHttpApi } = require('./updateHttpApiStageThrottling');
 
-const updateStageThrottling = async (settings, serverless) => {
+const updateStageThrottling = async (serverless, settings) => {
   if (isEmpty(settings)) {
     return;
   }
