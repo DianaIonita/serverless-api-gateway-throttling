@@ -93,6 +93,14 @@ class Serverless {
     return this;
   }
 
+  recordAwsRequests() {
+    this.providers.aws.request =
+      async (awsService, method, properties, stage, region) => {
+        this._recordedAwsRequests.push({ awsService, method, properties, stage, region });
+      }
+    return this;
+  }
+
   setDeployedRestApiId(restApiId, settings) {
     this.providers.aws.request =
       async (awsService, method, properties, stage, region) => {
