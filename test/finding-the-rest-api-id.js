@@ -10,8 +10,8 @@ describe('Finding the REST API', () => {
   describe('when the REST API ID has already been defined in serverless configuration', () => {
     before(async () => {
       let serverless = given
-        .a_serverless_instance()
-        .withPredefinedRestApiId(given.a_rest_api_id());
+        .aServerlessInstance()
+        .withPredefinedRestApiId(given.aRestApiId());
       settings = new ApiGatewayThrottlingSettings(serverless);
 
       result = await restApiExists(serverless, settings);
@@ -26,10 +26,10 @@ describe('Finding the REST API', () => {
     let restApiId, serverless, settings;
     before(async () => {
       serverless = given
-        .a_serverless_instance();
+        .aServerlessInstance();
 
       settings = new ApiGatewayThrottlingSettings(serverless);
-      restApiId = given.a_deployed_rest_api_id(serverless, settings);
+      restApiId = given.aDeployedRestApiId(serverless, settings);
 
       result = await restApiExists(serverless, settings);
     });
@@ -44,37 +44,34 @@ describe('Finding the REST API', () => {
     });
   });
 
-  describe('when the REST API has not been defined in serverless configuration', () => {
-    describe('and there are HTTP handler functions', () => {
-      before(async () => {
-        let functionWithHttpEndpoint = given
-          .a_serverless_function('get-cat-by-paw-id')
-          .withHttpEndpoint('get', '/cat/{pawId}');
-        serverless = given
-          .a_serverless_instance()
-          .withFunction(functionWithHttpEndpoint);
-        settings = new ApiGatewayThrottlingSettings(serverless);
+  describe('when the REST API Id is part of the compiledCloudFormationTemplate because the serverless configuration includes REST endpoints', () => {
+    let restApiId;
+    before(async () => {
+      restApiId = given.aRestApiId();
+      serverless = given
+        .aServerlessInstance()
+        .withARestApiInCloudFormation(restApiId)
+      settings = new ApiGatewayThrottlingSettings(serverless);
 
-        result = await restApiExists(serverless, settings);
-      });
-
-      it('should return that the REST API does exist', () => {
-        expect(result).to.be.true;
-      });
+      result = await restApiExists(serverless, settings);
     });
 
-    describe('and there are no HTTP handler functions', () => {
-      before(async () => {
-        serverless = given.a_serverless_instance();
-        settings = new ApiGatewayThrottlingSettings(serverless);
-        given.the_rest_api_id_is_not_set_for_deployment(serverless, settings);
+    it('should return that the REST API does exist', () => {
+      expect(result).to.be.true;
+    });
+  });
 
-        result = await restApiExists(serverless, settings);
-      });
+  describe('when the REST API ID has not been defined anywhere', () => {
+    before(async () => {
+      let serverless = given
+        .aServerlessInstance()
+      settings = new ApiGatewayThrottlingSettings(serverless);
 
-      it('should return that the REST API does not exist', () => {
-        expect(result).to.be.false;
-      });
+      result = await restApiExists(serverless, settings);
+    });
+
+    it('should return that the REST API does not exist', () => {
+      expect(result).to.be.false;
     });
   });
 });
