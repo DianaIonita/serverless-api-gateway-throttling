@@ -3,11 +3,6 @@ const { retrieveHttpApiId } = require('./httpApiId');
 const { httpApiEventOf } = require('./lib');
 
 const updateHttpApi = async (settings, serverless) => {
-    if (!settings.httpApiEndpointSettings || settings.httpApiEndpointSettings.length == 0) {
-        serverless.cli.log(`[serverless-api-gateway-throttling] No HTTP API endpoints found.`);
-        return;
-    }
-
     const httpApiId = await retrieveHttpApiId(serverless, settings);
 
     let httpApiRouteSettings = {};
@@ -18,17 +13,25 @@ const updateHttpApi = async (settings, serverless) => {
         }
     }
 
-    const { stage, region } = settings;
+    const { defaultHttpApiStage, region } = settings;
 
     const params = {
         ApiId: httpApiId,
-        StageName: stage,
+        StageName: defaultHttpApiStage,
+        DefaultRouteSettings: createRouteSettingsForStage(settings),
         RouteSettings: httpApiRouteSettings
     }
 
     serverless.cli.log(`[serverless-api-gateway-throttling] Updating API Gateway HTTP API throttling settings...`);
-    await serverless.providers.aws.request('APIGatewayV2', 'updateStage', params, stage, region);
+    await serverless.providers.aws.request('ApiGatewayV2', 'updateStage', params, { region });
     serverless.cli.log(`[serverless-api-gateway-throttling] Done updating API Gateway HTTP API throttling settings.`);
+}
+
+const createRouteSettingsForStage = (settings) => {
+    return {
+        ThrottlingBurstLimit: settings.maxConcurrentRequests,
+        ThrottlingRateLimit: settings.maxRequestsPerSecond
+    }
 }
 
 const createRouteSettingsForHttpApiEndpoint = (endpointSettings, serverless) => {
@@ -66,7 +69,7 @@ const createRouteSettingsForHttpApiEndpoint = (endpointSettings, serverless) => 
 
 const routeSettingsForMethod = (path, method, endpointSettings) => {
     const route = {
-        [`${method} ${path}`]: {
+        [`${method.toUpperCase()} ${path}`]: {
             ThrottlingBurstLimit: endpointSettings.maxConcurrentRequests,
             ThrottlingRateLimit: endpointSettings.maxRequestsPerSecond
         }

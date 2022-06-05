@@ -3,6 +3,7 @@
 const given = require('./steps/given');
 const ApiGatewayThrottlingSettings = require('../src/ApiGatewayThrottlingSettings');
 const updateStageThrottling = require('../src/updateStageThrottling');
+const { updateRestApi } = require('../src/updateRestApiStageThrottling');
 const expect = require('chai').expect;
 
 const API_GATEWAY = 'APIGateway', UPDATE_STAGE = 'updateStage';
@@ -12,20 +13,7 @@ describe('Updating stage throttling settings for a REST API', () => {
   let serverless, settings, requestsToAws, restApiId, apiGatewayRequest;
   let globalThrottlingSettings = { maxRequestsPerSecond: 1000, maxConcurrentRequests: 500 };
 
-  describe('when throttling settings are not defined', () => {
-    before(async () => {
-      serverless = given.aServerlessInstance();
-      await when_updating_stage_throttling_settings({}, serverless);
-
-      requestsToAws = serverless.getRequestsToAws();
-    });
-
-    it('should not make calls to the AWS SDK', () => {
-      expect(requestsToAws).to.be.empty;
-    });
-  });
-
-  describe('when there are no http endpoints with custom throttling configuration', () => {
+  describe('when there are no rest endpoints with custom throttling configuration', () => {
     before(async () => {
       serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
@@ -35,7 +23,7 @@ describe('Updating stage throttling settings for a REST API', () => {
 
       restApiId = await given.aDeployedRestApiId(serverless, settings)
 
-      await when_updating_stage_throttling_settings(settings, serverless);
+      await when_updating_rest_api_throttling_settings(settings, serverless);
 
       requestsToAws = serverless.getRequestsToAws();
     });
@@ -96,7 +84,7 @@ describe('Updating stage throttling settings for a REST API', () => {
 
       restApiId = await given.aDeployedRestApiId(serverless, settings)
 
-      await when_updating_stage_throttling_settings(settings, serverless);
+      await when_updating_rest_api_throttling_settings(settings, serverless);
 
       requestsToAws = serverless.getRequestsToAws();
     });
@@ -119,7 +107,7 @@ describe('Updating stage throttling settings for a REST API', () => {
         expect(apiGatewayRequest.properties.stageName).to.equal(stage);
       });
 
-      it('should specify two patch operations for each http endpoint and two patch operations for the stage', () => {
+      it('should specify two patch operations for each rest endpoint and two patch operations for the stage', () => {
         expect(apiGatewayRequest.properties.patchOperations).to.have.lengthOf(8);
       });
 
@@ -173,7 +161,7 @@ describe('Updating stage throttling settings for a REST API', () => {
     });
   });
 
-  describe('when there\'s a function with two http endpoints with custom throttling configuration', () => {
+  describe('when there\'s a function with two rest endpoints with custom throttling configuration', () => {
     before(async () => {
       serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
@@ -186,7 +174,7 @@ describe('Updating stage throttling settings for a REST API', () => {
 
       restApiId = await given.aDeployedRestApiId(serverless, settings)
 
-      await when_updating_stage_throttling_settings(settings, serverless);
+      await when_updating_rest_api_throttling_settings(settings, serverless);
 
       requestsToAws = serverless.getRequestsToAws();
     });
@@ -209,7 +197,7 @@ describe('Updating stage throttling settings for a REST API', () => {
         expect(apiGatewayRequest.properties.stageName).to.equal(stage);
       });
 
-      it('should specify two patch operations for each http endpoint and two patch operations for the stage', () => {
+      it('should specify two patch operations for each rest endpoint and two patch operations for the stage', () => {
         expect(apiGatewayRequest.properties.patchOperations).to.have.lengthOf(6);
       });
 
@@ -275,7 +263,7 @@ describe('Updating stage throttling settings for a REST API', () => {
 
       restApiId = await given.aDeployedRestApiId(serverless, settings)
 
-      await when_updating_stage_throttling_settings(settings, serverless);
+      await when_updating_rest_api_throttling_settings(settings, serverless);
 
       requestsToAws = serverless.getRequestsToAws();
       apiGatewayRequest = requestsToAws.find(r => r.awsService == API_GATEWAY && r.method == UPDATE_STAGE);
@@ -306,10 +294,10 @@ describe('Updating stage throttling settings for a REST API', () => {
     }
   });
 
-  describe('when there are many, many http endpoints with custom throttling configuration', () => {
+  describe('when there are many, many rest endpoints with custom throttling configuration', () => {
     let requestsToAwsToUpdateStage;
     before(async () => {
-      let functions = given.functionsWithCustomThrottlingConfiguration(50, { maxRequestsPerSecond: 300, maxConcurrentRequests: 200 });
+      let functions = given.functionsWithRestEndpointsWithCustomThrottlingConfiguration(50, { maxRequestsPerSecond: 300, maxConcurrentRequests: 200 });
 
       serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
@@ -323,7 +311,7 @@ describe('Updating stage throttling settings for a REST API', () => {
 
       restApiId = await given.aDeployedRestApiId(serverless, settings)
 
-      await when_updating_stage_throttling_settings(settings, serverless);
+      await when_updating_rest_api_throttling_settings(settings, serverless);
 
       requestsToAws = serverless.getRequestsToAws();
       requestsToAwsToUpdateStage = requestsToAws.filter(r => r.method == UPDATE_STAGE && r.awsService == API_GATEWAY);
@@ -358,6 +346,6 @@ describe('Updating stage throttling settings for a REST API', () => {
   });
 });
 
-const when_updating_stage_throttling_settings = async (settings, serverless) => {
-  return await updateStageThrottling(serverless, settings);
+const when_updating_rest_api_throttling_settings = async (settings, serverless) => {
+  return await updateRestApi(settings, serverless);
 }

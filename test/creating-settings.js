@@ -81,7 +81,7 @@ describe('Creating throttling settings', () => {
     };
 
     describe('and there are functions', () => {
-      describe('and none of them are http endpoints', () => {
+      describe('and none of them are REST endpoints', () => {
         before(() => {
           serverless = given.aServerlessInstance()
             .withApiGatewayThrottlingConfig(globalThrottlingConfig)
@@ -95,7 +95,7 @@ describe('Creating throttling settings', () => {
         });
       });
 
-      describe('and there are some http endpoints', () => {
+      describe('and there are some REST endpoints', () => {
         before(() => {
           serverless = given.aServerlessInstance()
             .withApiGatewayThrottlingConfig(globalThrottlingConfig)
@@ -108,19 +108,19 @@ describe('Creating throttling settings', () => {
           throttlingSettings = createSettingsFor(serverless);
         });
 
-        it('should create throttling settings only for the http endpoints', () => {
+        it('should create throttling settings only for the REST endpoints', () => {
           expect(throttlingSettings.restEndpointSettings).to.have.lengthOf(2);
         });
 
-        it('should not create http api throttling settings', () => {
+        it('should not create Http Api throttling settings', () => {
           expect(throttlingSettings.httpApiEndpointSettings).to.have.lengthOf(0);
         });
 
-        it('should not create throttling settings for the function without an http endpoint', () => {
+        it('should not create throttling settings for the function without a REST endpoint', () => {
           expect(throttlingSettings.restEndpointSettings.find(e => e.functionName == 'count-items-cron-job')).to.not.exist;
         });
 
-        describe('for the http endpoint with custom maxRequestsPerSecond and maxConcurrentRequests settings', () => {
+        describe('for the REST endpoint with custom maxRequestsPerSecond and maxConcurrentRequests settings', () => {
           let restEndpointSettings;
           before(() => {
             restEndpointSettings = throttlingSettings.restEndpointSettings.find(e => e.functionName == 'get-item');
@@ -135,7 +135,7 @@ describe('Creating throttling settings', () => {
           });
         })
 
-        describe('for the http endpoint with custom throttling disabled', () => {
+        describe('for the REST endpoint with custom throttling disabled', () => {
           let restEndpointSettings;
           before(() => {
             restEndpointSettings = throttlingSettings.restEndpointSettings.find(e => e.functionName == 'list-items');
@@ -151,7 +151,7 @@ describe('Creating throttling settings', () => {
         });
       });
 
-      describe('and one function has defined many http endpoints', () => {
+      describe('and one function has defined many REST endpoints', () => {
         before(() => {
           serverless = given.aServerlessInstance()
             .withApiGatewayThrottlingConfig(globalThrottlingConfig)
@@ -166,7 +166,7 @@ describe('Creating throttling settings', () => {
           expect(throttlingSettings.restEndpointSettings).to.have.lengthOf(2);
         });
 
-        it('should not create http api throttling settings', () => {
+        it('should not create Http Api throttling settings', () => {
           expect(throttlingSettings.httpApiEndpointSettings).to.have.lengthOf(0);
         });
       });
@@ -186,7 +186,11 @@ describe('Creating throttling settings', () => {
           expect(throttlingSettings.httpApiEndpointSettings).to.have.lengthOf(2);
         });
 
-        it('should not create rest endpoint throttling settings', () => {
+        it('should set the default Http Api Stage', () => {
+          expect(throttlingSettings.defaultHttpApiStage).to.equal('$default');
+        });
+
+        it('should not create REST endpoint throttling settings', () => {
           expect(throttlingSettings.restEndpointSettings).to.have.lengthOf(0);
         });
       });
@@ -288,7 +292,7 @@ describe('Creating throttling settings', () => {
     });
   });
 
-  describe('when a http endpoint is defined in shorthand', () => {
+  describe('when a REST endpoint is defined in shorthand', () => {
     let restEndpointSettings;
     before(() => {
       let endpoint = given.aServerlessFunction('list-items')
@@ -332,7 +336,7 @@ describe('Creating throttling settings', () => {
     });
   });
 
-  describe('when a http endpoint has throttling specifically disabled', () => {
+  describe('when a REST endpoint has throttling specifically disabled', () => {
     let restEndpointSettings;
     before(() => {
       serverless = given.aServerlessInstance()

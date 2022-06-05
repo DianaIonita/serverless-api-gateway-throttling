@@ -5,6 +5,7 @@ const isEmpty = require('lodash.isempty');
 
 const DEFAULT_MAX_REQUESTS_PER_SECOND = 10000;
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 5000;
+const DEFAULT_HTTP_API_STAGE = '$default';
 
 const isApiGatewayEndpoint = event => {
   return event.http ? true : false;
@@ -56,6 +57,7 @@ class ApiGatewayThrottlingSettings {
     }
     this.maxRequestsPerSecond = serverless.service.custom.apiGatewayThrottling.maxRequestsPerSecond || DEFAULT_MAX_REQUESTS_PER_SECOND;
     this.maxConcurrentRequests = serverless.service.custom.apiGatewayThrottling.maxConcurrentRequests || DEFAULT_MAX_CONCURRENT_REQUESTS;
+    this.defaultHttpApiStage = DEFAULT_HTTP_API_STAGE;
 
     this.restEndpointSettings = [];
     this.httpApiEndpointSettings = [];

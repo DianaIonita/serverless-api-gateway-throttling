@@ -42,7 +42,7 @@ const theHttpApiIdIsNotSetForDeployment = (serverless, settings) => {
   serverless.setDeployedHttpApiId(undefined, settings);
 }
 
-const functionsWithCustomThrottlingConfiguration = (endpointCount, throttlingConfiguration) => {
+const functionsWithRestEndpointsWithCustomThrottlingConfiguration = (endpointCount, throttlingConfiguration) => {
   let result = [];
   for (let i = 0; i < endpointCount; i++) {
     result.push(
@@ -61,5 +61,5 @@ module.exports = {
   aHttpApiId,
   aDeployedHttpApiId,
   theHttpApiIdIsNotSetForDeployment,
-  functionsWithCustomThrottlingConfiguration
+  functionsWithRestEndpointsWithCustomThrottlingConfiguration
 }
