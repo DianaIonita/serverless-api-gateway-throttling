@@ -3,6 +3,7 @@
 const ApiGatewayThrottlingSettings = require('./ApiGatewayThrottlingSettings');
 const updateStageThrottling = require('./updateStageThrottling');
 const { restApiExists, outputRestApiIdTo } = require('./restApiId');
+const { httpApiExists, outputHttpApiIdTo } = require('./httpApiId');
 const resetEndpointSpecificSettings = require('./resetEndpointSpecificSettings');
 
 class ApiGatewayThrottlingPlugin {
@@ -33,13 +34,21 @@ class ApiGatewayThrottlingPlugin {
   }
 
   async updateCloudFormationTemplate() {
-    this.thereIsARestApi = await restApiExists(this.serverless);
+    this.thereIsARestApi = await restApiExists(this.serverless, this.settings);
     if (!this.thereIsARestApi) {
-      this.serverless.cli.log(`[serverless-api-gateway-throttling] No REST API found. Throttling settings will be ignored.`);
-      return;
+      this.serverless.cli.log(`[serverless-api-gateway-throttling] No REST API found. Throttling settings will be ignored for REST API endpoints.`);
+    }
+    else {
+      outputRestApiIdTo(this.serverless);
     }
 
-    outputRestApiIdTo(this.serverless);
+    this.thereIsAHttpApi = await httpApiExists(this.serverless, this.settings);
+    if (!this.thereIsAHttpApi) {
+      this.serverless.cli.log(`[serverless-api-gateway-throttling] No HTTP API (API Gateway v2) found. Throttling settings will be ignored for HTTP API endpoints.`);
+    }
+    else {
+      outputHttpApiIdTo(this.serverless);
+    }
   }
 
   async updateStage() {
@@ -53,7 +62,7 @@ class ApiGatewayThrottlingPlugin {
       return;
     }
 
-    await updateStageThrottling(this.settings, this.serverless);
+    await updateStageThrottling(this.serverless, this.settings);
   }
 
   async resetEndpointSettings() {
@@ -103,6 +112,7 @@ class ApiGatewayThrottlingPlugin {
       }
     }
     this.serverless.configSchemaHandler.defineFunctionEventProperties('aws', 'http', httpEventThrottlingSchema);
+    this.serverless.configSchemaHandler.defineFunctionEventProperties('aws', 'httpApi', httpEventThrottlingSchema);
   }
 }
 

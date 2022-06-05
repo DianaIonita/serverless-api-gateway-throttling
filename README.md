@@ -11,6 +11,7 @@ A plugin for the Serverless framework which configures throttling for API Gatewa
 When you deploy an API to API Gateway, throttling is enabled by default. However, the default method limits – 10,000 requests/second with a burst of 5000 concurrent requests – match your account level limits. As a result, ALL your APIs in the entire region share a rate limit that can be exhausted by a single method. Read more about that [here](https://theburningmonk.com/2019/10/the-api-gateway-security-flaw-you-need-to-pay-attention-to/).
 
 This plugin makes it easy to configure those limits.
+It supports both API Gateway v1 (REST API) and API Gateway v2 (HTTP API).
 
 ## Good to know
 - if custom throttling settings are defined for an endpoint with HTTP method `ANY`, the settings will be applied to all methods: `GET`, `DELETE`, `HEAD`, `OPTIONS`, `PATCH`, `POST` and `PUT`.
@@ -87,12 +88,23 @@ functions:
             maxConcurrentRequests: 300
 
   # Throttling is disabled for this endpoint
-  list-all-items:
+  list-more-items:
     handler: rest_api/items/get/handler.handle
     events:
       - http:
-          path: /items
+          path: /more-items
           method: get
           throttling:
             disabled: true
+  
+  # Also supports httpApi
+  list-http-api-items:
+    handler: rest_api/items/get/handler.handle
+    events:
+      - httpApi:
+          path: /http-api-items
+          method: get
+          throttling:
+            maxRequestsPerSecond: 3000
+            maxConcurrentRequests: 1000
 ```

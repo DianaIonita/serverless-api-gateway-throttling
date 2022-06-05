@@ -13,12 +13,12 @@ describe('Resetting endpoint settings', () => {
 
   describe('when there are no http endpoints', () => {
     before(async () => {
-      serverless = given.a_serverless_instance()
+      serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
-        .withFunction(given.a_serverless_function('list-items'));
+        .withFunction(given.aServerlessFunction('list-items'));
       settings = new ApiGatewayThrottlingSettings(serverless);
 
-      restApiId = await given.a_deployed_rest_api_id(serverless, settings)
+      restApiId = await given.aDeployedRestApiId(serverless, settings)
 
       await when_resetting_endpoint_settings(settings, serverless);
 
@@ -31,21 +31,22 @@ describe('Resetting endpoint settings', () => {
     });
   });
 
-  describe('when there are some HTTP endpoints', () => {
+  describe('when there are some REST endpoints', () => {
     before(async () => {
-      serverless = given.a_serverless_instance()
+      serverless = given.aServerlessInstance()
         .forStage(stage).forRegion(region)
         .withApiGatewayThrottlingConfig()
-        .withFunction(given.a_serverless_function('list-items')
-          .withHttpEndpoint('get', '/items'))
-        .withFunction(given.a_serverless_function('create-item')
-          .withHttpEndpoint('post', '/item/{itemId}'))
-        .withFunction(given.a_serverless_function('delete-item')
-          .withHttpEndpoint('delete', '/item/{itemId}'));
+        .withFunction(given.aServerlessFunction('list-items')
+          .withRestEndpoint('get', '/items'))
+        .withFunction(given.aServerlessFunction('create-item')
+          .withRestEndpoint('post', '/item/{itemId}'))
+        .withFunction(given.aServerlessFunction('delete-item')
+          .withRestEndpoint('delete', '/item/{itemId}'));
 
       settings = new ApiGatewayThrottlingSettings(serverless);
 
-      restApiId = await given.a_deployed_rest_api_id(serverless, settings)
+      restApiId = given.aRestApiId()
+      serverless = serverless.withDeployedRestApiId(restApiId, settings);
 
       await when_resetting_endpoint_settings(settings, serverless);
 

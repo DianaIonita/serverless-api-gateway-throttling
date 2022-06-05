@@ -35,6 +35,27 @@ const httpEventOf = (lambda, endpointSettings) => {
     .filter(e => e.method.toUpperCase() == endpointSettings.method.toUpperCase())[0];
 }
 
+const httpApiEventOf = (lambda, endpointSettings) => {
+  let httpApiEvents = lambda.events.filter(e => e.httpApi != undefined)
+    .map(e => {
+      if (typeof (e.httpApi) === 'string') {
+        let parts = e.httpApi.split(' ');
+        return {
+          method: parts[0],
+          path: parts[1]
+        }
+      } else {
+        return {
+          method: e.httpApi.method,
+          path: e.httpApi.path
+        }
+      }
+    });
+
+  return httpApiEvents.filter(e => e.path = endpointSettings.path || "/" + e.path === endpointSettings.path)
+    .filter(e => e.method.toUpperCase() == endpointSettings.method.toUpperCase())[0];
+}
+
 const patchPathFor = (path, method) => {
   let escapedPath = escapeJsonPointer(path);
   if (!escapedPath.startsWith('~1')) {
@@ -46,5 +67,6 @@ const patchPathFor = (path, method) => {
 
 module.exports = {
   patchPathFor,
-  httpEventOf
+  httpEventOf,
+  httpApiEventOf
 }
