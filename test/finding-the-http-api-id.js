@@ -24,8 +24,7 @@ describe('Finding the HTTP API', () => {
     describe('when the CloudFormation stack has already been deployed and it output a HttpApiIdForApigThrottling', () => {
         let httpApiId, serverless, settings;
         before(async () => {
-            serverless = given
-                .aServerlessInstance();
+            serverless = given.aServerlessInstance();
 
             settings = new ApiGatewayThrottlingSettings(serverless);
             httpApiId = given.aDeployedHttpApiId(serverless, settings);
