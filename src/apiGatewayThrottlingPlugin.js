@@ -1,10 +1,11 @@
 'use strict';
 
 const ApiGatewayThrottlingSettings = require('./ApiGatewayThrottlingSettings');
-const updateStageThrottling = require('./updateStageThrottling');
 const { restApiExists, outputRestApiIdTo } = require('./restApiId');
 const { httpApiExists, outputHttpApiIdTo } = require('./httpApiId');
 const resetEndpointSpecificSettings = require('./resetEndpointSpecificSettings');
+const { updateRestApi } = require('./updateRestApiStageThrottling');
+const { updateHttpApi } = require('./updateHttpApiStageThrottling');
 
 class ApiGatewayThrottlingPlugin {
   constructor(serverless, options) {
@@ -39,7 +40,7 @@ class ApiGatewayThrottlingPlugin {
       this.serverless.cli.log(`[serverless-api-gateway-throttling] No REST API found. Throttling settings will be ignored for REST API endpoints.`);
     }
     else {
-      outputRestApiIdTo(this.serverless);
+      await outputRestApiIdTo(this.serverless);
     }
 
     this.thereIsAHttpApi = await httpApiExists(this.serverless, this.settings);
@@ -47,7 +48,7 @@ class ApiGatewayThrottlingPlugin {
       this.serverless.cli.log(`[serverless-api-gateway-throttling] No HTTP API (API Gateway v2) found. Throttling settings will be ignored for HTTP API endpoints.`);
     }
     else {
-      outputHttpApiIdTo(this.serverless);
+      await outputHttpApiIdTo(this.serverless);
     }
   }
 
@@ -57,12 +58,14 @@ class ApiGatewayThrottlingPlugin {
     }
 
     this.thereIsARestApi = await restApiExists(this.serverless, this.settings);
-    if (!this.thereIsARestApi) {
-      this.serverless.cli.log('[serverless-api-gateway-throttling] No Rest API found. Throttling settings will be ignored.');
-      return;
-    }
+    this.thereIsAHttpApi = await httpApiExists(this.serverless, this.settings);
 
-    await updateStageThrottling(this.serverless, this.settings);
+    if (this.thereIsARestApi) {
+      await updateRestApi(this.settings, this.serverless);
+    }
+    if (this.thereIsAHttpApi) {
+      await updateHttpApi(this.settings, this.serverless);
+    }
   }
 
   async resetEndpointSettings() {

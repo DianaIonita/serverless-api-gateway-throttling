@@ -2,7 +2,7 @@
 
 const given = require('./steps/given');
 const ApiGatewayThrottlingSettings = require('../src/ApiGatewayThrottlingSettings');
-const updateStageThrottling = require('../src/updateStageThrottling');
+const ApiGatewayThrottlingPlugin = require('../src/apiGatewayThrottlingPlugin');
 const expect = require('chai').expect;
 
 const API_GATEWAY_V1 = 'APIGateway';
@@ -31,7 +31,8 @@ describe('Updating stage throttling settings for a HTTP API', () => {
                 .recordAwsRequests();
             settings = new ApiGatewayThrottlingSettings(serverless);
 
-            await updateStageThrottling(serverless, settings);
+            const plugin = new ApiGatewayThrottlingPlugin(serverless);
+            await plugin.updateStage();
 
             requestsToAws = serverless.getRequestsToAws();
         });
