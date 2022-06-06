@@ -2,7 +2,6 @@
 
 const given = require('./steps/given');
 const ApiGatewayThrottlingSettings = require('../src/ApiGatewayThrottlingSettings');
-const updateStageThrottling = require('../src/updateStageThrottling');
 const { updateRestApi } = require('../src/updateRestApiStageThrottling');
 const expect = require('chai').expect;
 
