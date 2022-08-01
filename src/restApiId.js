@@ -68,6 +68,9 @@ const retrieveRestApiId = async (serverless, settings) => {
   }
 
   const stack = await getAlreadyDeployedStack(serverless, settings);
+  if(!stack){
+    return;
+  }
   const outputs = stack.Stacks[0].Outputs;
   const restApiKey = outputs.find(({ OutputKey }) => OutputKey === REST_API_ID_KEY)
   if (restApiKey) {
