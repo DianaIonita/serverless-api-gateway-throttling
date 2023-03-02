@@ -50,7 +50,7 @@ const createRouteSettingsForHttpApiEndpoint = (endpointSettings, serverless) => 
 
     let routeSettings = {};
     if (method.toUpperCase() == 'ANY') {
-        let httpMethodsToConfigureThrottlingFor = ['GET', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'];
+        let httpMethodsToConfigureThrottlingFor = ['ANY'];
         for (let methodWithThrottlingSettings of httpMethodsToConfigureThrottlingFor) {
             routeSettings = {
                 ...routeSettings,
