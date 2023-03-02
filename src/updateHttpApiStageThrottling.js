@@ -50,7 +50,7 @@ const createRouteSettingsForHttpApiEndpoint = (endpointSettings, serverless) => 
 
     let routeSettings = {};
     if (method.toUpperCase() == 'ANY') {
-        let httpMethodsToConfigureThrottlingFor = ['ANY'];
+        let httpMethodsToConfigureThrottlingFor = ['ANY']; //In ApiGatewaV2(HTTP), For Method type ANY, the Throttling route should also have ANY method.
         for (let methodWithThrottlingSettings of httpMethodsToConfigureThrottlingFor) {
             routeSettings = {
                 ...routeSettings,
