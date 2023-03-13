@@ -48,10 +48,7 @@ const createRouteSettingsForHttpApiEndpoint = (endpointSettings, serverless) => 
 
     let { path, method } = httpApiEvent;
     //Throttling route setting should be created with the same method type as defined in the httpApi.
-    const routeSettings = {
-        ...routeSettingsForMethod(path, method.toUpperCase(), endpointSettings)
-    };
-    return routeSettings;
+    return routeSettingsForMethod(path, method.toUpperCase(), endpointSettings);
 }
 
 const routeSettingsForMethod = (path, method, endpointSettings) => {
