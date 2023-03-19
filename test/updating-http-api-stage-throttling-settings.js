@@ -238,17 +238,14 @@ describe('Updating stage throttling settings for a HTTP API', () => {
             expect(request).to.have.lengthOf(1);
         });
 
-        let allMethods = ['GET', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'];
-        for (let method of allMethods) {
-            it(`should set the burst and rate limit for the ${method} method`, () => {
-                expect(apiGatewayRequest.properties.RouteSettings).to.deep.include({
-                    [`${method.toUpperCase()} /item`]: {
-                        ThrottlingBurstLimit: 250,
-                        ThrottlingRateLimit: 500
-                    }
-                });
+        it(`should set the burst and rate limit for the ANY method`, () => {
+            expect(apiGatewayRequest.properties.RouteSettings).to.deep.include({
+                [`ANY /item`]: {
+                    ThrottlingBurstLimit: 250,
+                    ThrottlingRateLimit: 500
+                }
             });
-        }
+        });
     });
 });
 
